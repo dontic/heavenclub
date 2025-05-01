@@ -14,8 +14,8 @@ export default function HLSPlayer({
   src,
   width = '100%',
   height = 'auto',
-  controls = true,
-  autoplay = false,
+  controls = false,
+  autoplay = true,
   className = '',
   title = 'Video stream',
 }: HLSPlayerProps) {
@@ -30,6 +30,11 @@ export default function HLSPlayer({
 
     const handleCanPlay = () => {
       setIsLoading(false);
+      if (autoplay) {
+        video.play().catch((err) => {
+          console.error('Failed to autoplay:', err);
+        });
+      }
     };
 
     const handleError = () => {
@@ -44,6 +49,11 @@ export default function HLSPlayer({
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       // Native HLS support (Safari)
       video.src = src;
+      if (autoplay) {
+        video.play().catch((err) => {
+          console.error('Failed to autoplay in Safari:', err);
+        });
+      }
     } else {
       // Use hls.js for browsers that don't support HLS natively
       import('hls.js')
@@ -112,11 +122,17 @@ export default function HLSPlayer({
       <video
         ref={videoRef}
         controls={controls}
+        autoPlay={autoplay}
+        muted={autoplay}
         width={width}
         height={height}
         style={{ width, height }}
         className="rounded-lg"
         title={title}
+        disablePictureInPicture
+        controlsList="nodownload"
+        playsInline
+        loop
       />
     </div>
   );
