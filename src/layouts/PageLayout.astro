@@ -1,0 +1,45 @@
+---
+// PageLayout.astro
+// This layout is used for all pages
+// Includes a header and a footer
+
+import Layout from './Layout.astro';
+import Header from '~/components/common/Header.astro';
+import Footer from '~/components/common/Footer.astro';
+import { NAVIGATION } from '~/config';
+
+// Props
+// - hasBgPattern: boolean
+// Accept metadata props
+export interface Props {
+  metadata?: {
+    title?: string;
+    useTitleTemplate?: boolean;
+    description?: string;
+    ogImagePath?: string;
+    canonicalUrl?: string;
+    pubDatetime?: Date;
+    modDatetime?: Date;
+    author?: string;
+    index?: boolean;
+    follow?: boolean;
+  };
+}
+
+const { metadata } = Astro.props;
+---
+
+<Layout metadata={metadata}>
+  <div class="flex flex-col min-h-screen">
+    <slot name="header">
+      <Header {...NAVIGATION.header} />
+    </slot>
+    <main class="flex-grow">
+      <slot />
+    </main>
+
+    <slot name="footer">
+      <Footer {...NAVIGATION.footer} />
+    </slot>
+  </div>
+</Layout>

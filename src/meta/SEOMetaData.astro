@@ -1,0 +1,62 @@
+---
+import { SEO } from 'astro-seo';
+
+import type { MetaData } from '~/types';
+
+// Defaults
+const {
+  title = 'Heaven Club',
+  useTitleTemplate = false,
+  description = 'Heaven Club es el mejor club de kitesurf de la costa del sol. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
+  canonical = Astro.url.href,
+  index = true,
+  follow = true,
+  openGraph = {
+    title: 'Heaven Club',
+    description:
+      'Heaven Club es el mejor club de kitesurf de la costa del sol. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
+    type: 'website',
+    image: '~/assets/images/og_image.png',
+    url: canonical,
+    siteName: 'Heaven Club',
+    locale: 'es_ES',
+  },
+  twitter = {
+    cardType: 'summary_large_image',
+    site: '@heaven_kite_club',
+    title: 'Heaven Club',
+    description:
+      'Heaven Club es el mejor club de kitesurf de la costa del sol. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
+    image: '~/assets/images/og_image.png',
+  },
+}: MetaData = Astro.props;
+---
+
+<SEO
+  title={title}
+  titleTemplate={useTitleTemplate ? '%s - Heaven Club' : undefined}
+  description={description}
+  canonical={canonical}
+  noindex={!index}
+  nofollow={!follow}
+  openGraph={{
+    basic: {
+      title: openGraph.title,
+      type: openGraph.type,
+      image: openGraph.image,
+      url: openGraph.url,
+    },
+    optional: {
+      locale: openGraph.locale,
+      siteName: openGraph.siteName,
+    },
+  }}
+  ,
+  twitter={{
+    card: twitter.cardType,
+    site: twitter.site,
+    title: twitter.title,
+    description: twitter.description,
+    image: twitter.image,
+  }}
+/>

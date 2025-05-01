@@ -1,0 +1,7 @@
+# robots.txt for https://heavenclubu.es
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://heavenclub.es/sitemap-index.xml 

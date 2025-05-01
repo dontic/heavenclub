@@ -1,0 +1,31 @@
+---
+import PageLayout from '~/layouts/PageLayout.astro';
+---
+
+<PageLayout
+  metadata={{
+    title: '404 Not Found',
+    description: 'Sorry, the page you are looking for does not exist.',
+  }}
+>
+  <section class="flex items-center h-full p-16 m-10">
+    <div class="container flex flex-col items-center justify-center px-5 mx-auto my-8">
+      <div class="max-w-md text-center">
+        <!-- Title -->
+        <h2 class="mb-8 font-bold text-5xl">
+          <span class="sr-only">Error</span>
+          <span class="text-primary">404</span>
+        </h2>
+
+        <!-- Message -->
+        <p class="text-3xl font-semibold md:text-3xl">Página no encontrada</p>
+        <p class="mt-4 mb-8 text-lg text-muted dark:text-slate-400">
+          No te preocupes, puedes encontrar muchas otras cosas en nuestra página de inicio.
+        </p>
+
+        <!--  -->
+        <a rel="noopener noreferrer" href="/" class="cta-primary">Volver a la página de inicio</a>
+      </div>
+    </div>
+  </section>
+</PageLayout>
