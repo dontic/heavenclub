@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type HLSPlayerProps = {
-  src: string;
   width?: string;
   height?: string;
   controls?: boolean;
@@ -11,7 +10,6 @@ type HLSPlayerProps = {
 };
 
 export default function HLSPlayer({
-  src,
   width = '100%',
   height = 'auto',
   controls = false,
@@ -22,6 +20,8 @@ export default function HLSPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+
+  const streamUrl = 'http://cam.heavenclub.es/heaven_cam/index.m3u8';
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -48,7 +48,7 @@ export default function HLSPlayer({
     // Check if HLS is supported natively
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
       // Native HLS support (Safari)
-      video.src = src;
+      video.src = streamUrl;
       if (autoplay) {
         video.play().catch((err) => {
           console.error('Failed to autoplay in Safari:', err);
@@ -69,7 +69,7 @@ export default function HLSPlayer({
               }
             });
 
-            hls.loadSource(src);
+            hls.loadSource(streamUrl);
             hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, () => {
               if (autoplay) video.play();
@@ -95,7 +95,7 @@ export default function HLSPlayer({
         videoRef.current.load();
       }
     };
-  }, [src, autoplay]);
+  }, [streamUrl, autoplay]);
 
   return (
     <div className={className} style={{ position: 'relative' }}>

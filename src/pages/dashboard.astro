@@ -1,6 +1,5 @@
 ---
 import PageLayout from '~/layouts/PageLayout.astro';
-import LogoutButton from '~/components/authentication/LogoutButton';
 import HLSPlayer from '~/components/video/HLSPlayer';
 ---
 
@@ -11,12 +10,7 @@ import HLSPlayer from '~/components/video/HLSPlayer';
 
       <div class="w-full max-w-3xl mb-8">
         <h2 class="text-xl font-semibold mb-4">Heaven Cam en vivo</h2>
-        <HLSPlayer
-          client:load
-          src="http://192.168.1.229:8888/heaven_cam/index.m3u8"
-          className="w-full aspect-video"
-          title="Heaven Cam en vivo"
-        />
+        <HLSPlayer client:load className="w-full aspect-video" title="Heaven Cam en vivo" />
       </div>
 
       <div class="w-full max-w-3xl mb-8">
