@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import supabase from '~/lib/supabase';
 
-type SignInState = 'EMAIL_INPUT' | 'OTP_INPUT' | 'SUBMITTING' | 'ERROR';
+type SignInState = 'EMAIL_INPUT' | 'OTP_INPUT' | 'ERROR';
 
 interface SignInProps {
   onSuccess?: () => void;
@@ -27,6 +27,7 @@ export default function SignIn({ onSuccess }: SignInProps) {
   const [errorMessage, setErrorMessage] = useState('');
   const [state, setState] = useState<SignInState>('EMAIL_INPUT');
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Check if user is already authenticated on component mount
@@ -55,7 +56,7 @@ export default function SignIn({ onSuccess }: SignInProps) {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setState('SUBMITTING');
+    setIsSubmitting(true);
     setErrorMessage('');
 
     try {
@@ -76,6 +77,7 @@ export default function SignIn({ onSuccess }: SignInProps) {
           setErrorMessage(error.message);
         }
         setState('EMAIL_INPUT');
+
         return;
       }
 
@@ -84,12 +86,14 @@ export default function SignIn({ onSuccess }: SignInProps) {
       console.error('Error sending OTP:', error);
       setErrorMessage('Error al enviar el código de verificación');
       setState('EMAIL_INPUT');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setState('SUBMITTING');
+    setIsSubmitting(true);
     setErrorMessage('');
 
     try {
@@ -120,6 +124,8 @@ export default function SignIn({ onSuccess }: SignInProps) {
       console.error('Error verifying OTP:', error);
       setErrorMessage('Error al verificar el código');
       setState('OTP_INPUT');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -139,7 +145,7 @@ export default function SignIn({ onSuccess }: SignInProps) {
             onChange={(e) => setEmail(e.target.value)}
             className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
             placeholder="Dirección de correo electrónico"
-            disabled={state === 'SUBMITTING'}
+            disabled={isSubmitting}
           />
         </div>
       </div>
@@ -147,10 +153,10 @@ export default function SignIn({ onSuccess }: SignInProps) {
       <div>
         <button
           type="submit"
-          disabled={state === 'SUBMITTING'}
+          disabled={isSubmitting}
           className="cta-gradient font-semibold w-full justify-center rounded-md py-2 px-4 text-white transition-colors flex items-center space-x-2"
         >
-          {state === 'SUBMITTING' ? (
+          {isSubmitting ? (
             <>
               <LoadingSpinner />
               <span>Enviando...</span>
@@ -183,7 +189,7 @@ export default function SignIn({ onSuccess }: SignInProps) {
             onChange={(e) => setOtp(e.target.value)}
             className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
             placeholder="Código de verificación"
-            disabled={state === 'SUBMITTING'}
+            disabled={isSubmitting}
           />
         </div>
       </div>
@@ -191,10 +197,10 @@ export default function SignIn({ onSuccess }: SignInProps) {
       <div className="flex flex-col space-y-2">
         <button
           type="submit"
-          disabled={state === 'SUBMITTING'}
+          disabled={isSubmitting}
           className="cta-gradient font-semibold w-full justify-center rounded-md py-2 px-4 text-white transition-colors flex items-center space-x-2"
         >
-          {state === 'SUBMITTING' ? (
+          {isSubmitting ? (
             <>
               <LoadingSpinner />
               <span>Verificando...</span>
@@ -207,7 +213,7 @@ export default function SignIn({ onSuccess }: SignInProps) {
           type="button"
           onClick={() => setState('EMAIL_INPUT')}
           className="text-sm text-indigo-600 hover:text-indigo-800"
-          disabled={state === 'SUBMITTING'}
+          disabled={isSubmitting}
         >
           Volver a introducir el correo
         </button>
