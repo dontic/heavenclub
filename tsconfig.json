@@ -1,11 +1,21 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "**/*", ".prettierrc.mjs"],
-  "exclude": ["dist"],
+  "include": [
+    ".astro/types.d.ts",
+    "**/*",
+    ".prettierrc.mjs"
+  ],
+  "exclude": [
+    "dist"
+  ],
   "compilerOptions": {
-    "baseUrl": ".", // Base URL for module resolution
+    "baseUrl": ".",
     "paths": {
-      "~/*": ["src/*"]
-    }
+      "~/*": [
+        "src/*"
+      ]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }
