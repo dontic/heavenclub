@@ -39,7 +39,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-var(--header-height)-var(--footer-height))]">
+    <div id="dashboard" className="mx-4">
       <section className="relative w-full h-full flex flex-col items-center justify-center mt-20">
         <h1 className="text-2xl font-bold mb-6">Portal de socios</h1>
 
