@@ -65,7 +65,7 @@ export const NAVIGATION: NavigationConfig = {
     actions: [
       {
         href: '/signin/',
-        text: 'Area de miembros',
+        text: 'Portal de socios',
         // icon: 'tabler:rocket',
       },
     ],
