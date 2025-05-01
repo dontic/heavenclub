@@ -17,9 +17,11 @@ type Link = {
 };
 
 type Action = {
-  href: string;
+  href?: string;
   text: string;
   icon?: string;
+  component?: any;
+  client?: string;
 };
 
 type FooterLinkGroup = {
