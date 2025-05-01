@@ -21,7 +21,7 @@ export default function HLSPlayer({
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  const streamUrl = 'http://cam.heavenclub.es/heaven_cam/index.m3u8';
+  const streamUrl = 'https://cam.heavenclub.es/heaven_cam/index.m3u8';
 
   useEffect(() => {
     if (!videoRef.current) return;
