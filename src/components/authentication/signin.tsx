@@ -2,7 +2,10 @@ import { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // Create Supabase client
-const supabase = createClient(import.meta.env.SUPABASE_URL, import.meta.env.SUPABASE_ANON_KEY);
+const supabase = createClient(
+  'https://mfbsesgwswgtlqnqqaap.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1mYnNlc2d3c3dndGxxbnFxYWFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYwMzYzNjgsImV4cCI6MjA2MTYxMjM2OH0.XzU2OPfCF5bHNWFhavzzhXFYD8v2AQTI8oK763huUVQ'
+);
 
 type SignInState = 'EMAIL_INPUT' | 'OTP_INPUT' | 'SUBMITTING' | 'ERROR';
 
@@ -61,12 +64,12 @@ export default function SignIn({ onSuccess }: SignInProps) {
         return;
       }
 
-      if (data.session) {
+      if (data?.session) {
         // Redirect to dashboard or call a success callback
         if (onSuccess) {
           onSuccess();
         } else {
-          window.location.href = '/dashboard';
+          window.location.href = '/dashboard/';
         }
       } else {
         setErrorMessage('No se pudo crear la sesión');
@@ -126,6 +129,7 @@ export default function SignIn({ onSuccess }: SignInProps) {
             name="otp"
             type="text"
             required
+            autoFocus
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
             className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500"
@@ -159,7 +163,7 @@ export default function SignIn({ onSuccess }: SignInProps) {
         <h2 className="text-center text-2xl font-bold">Inicia sesión en tu cuenta</h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           {state === 'EMAIL_INPUT'
-            ? 'Introduce tu correo electrónico para recibir un enlace mágico'
+            ? 'Introduce tu correo electrónico para recibir un código de verificación'
             : 'Introduce el código de verificación enviado a tu correo'}
         </p>
         <p className="mt-2 text-center text-sm font-medium text-amber-600">
