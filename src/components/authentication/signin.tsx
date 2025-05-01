@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
 // Create Supabase client
@@ -18,6 +18,32 @@ export default function SignIn({ onSuccess }: SignInProps) {
   const [otp, setOtp] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [state, setState] = useState<SignInState>('EMAIL_INPUT');
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    // Check if user is already authenticated on component mount
+    const checkAuthentication = async () => {
+      try {
+        setCheckingAuth(true);
+        const { data } = await supabase.auth.getSession();
+
+        if (data.session) {
+          // User is already authenticated, redirect to dashboard
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            window.location.href = '/dashboard/';
+          }
+        }
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+
+    checkAuthentication();
+  }, [onSuccess]);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -156,6 +182,15 @@ export default function SignIn({ onSuccess }: SignInProps) {
       </div>
     </form>
   );
+
+  // Show loading indicator while checking authentication
+  if (checkingAuth) {
+    return (
+      <div className="w-full max-w-md space-y-8 rounded-lg border p-6 shadow-md bg-white/90 backdrop-blur-sm mx-4 flex justify-center items-center">
+        <p className="text-gray-700">Comprobando autenticación...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md space-y-8 rounded-lg border p-6 shadow-md bg-white/90 backdrop-blur-sm mx-4">
