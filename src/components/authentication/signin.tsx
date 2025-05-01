@@ -67,7 +67,14 @@ export default function SignIn({ onSuccess }: SignInProps) {
       });
 
       if (error) {
-        setErrorMessage(error.message);
+        // Check for "Signups not allowed" error and display a more user-friendly message
+        if (error.message.includes('Signups not allowed')) {
+          setErrorMessage(
+            'Este correo electrónico no está registrado como socio. Por favor, contacta con el club para más información.'
+          );
+        } else {
+          setErrorMessage(error.message);
+        }
         setState('EMAIL_INPUT');
         return;
       }
@@ -227,9 +234,9 @@ export default function SignIn({ onSuccess }: SignInProps) {
             ? 'Introduce tu correo electrónico para recibir un código de verificación'
             : 'Introduce el código de verificación enviado a tu correo'}
         </p>
-        <p className="mt-2 text-center text-sm font-medium text-amber-600">
+        {/* <p className="mt-2 text-center text-sm font-medium text-amber-600">
           ⚠️ Solo los miembros del club pueden acceder a esta área
-        </p>
+        </p> */}
         {errorMessage && <p className="mt-2 text-center text-sm font-medium text-red-600">{errorMessage}</p>}
       </div>
 
