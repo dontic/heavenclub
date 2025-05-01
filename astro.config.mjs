@@ -1,24 +1,20 @@
 // @ts-check
-import { defineConfig } from "astro/config";
+import { defineConfig } from 'astro/config';
 
-import node from "@astrojs/node";
-import tailwindcss from "@tailwindcss/vite";
-import sitemap from "@astrojs/sitemap";
-import icon from "astro-icon";
-import mdx from "@astrojs/mdx";
+import tailwindcss from '@tailwindcss/vite';
+import sitemap from '@astrojs/sitemap';
+import icon from 'astro-icon';
+import mdx from '@astrojs/mdx';
 
-import react from "@astrojs/react";
+import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
-  output: "static",
-  adapter: node({
-    mode: "standalone",
-  }),
+  output: 'static',
   vite: {
     plugins: [tailwindcss()],
   },
-  site: "https://heavenclub.es",
+  site: 'https://heavenclub.es',
   integrations: [icon(), sitemap(), mdx(), react()],
-  trailingSlash: "always",
+  trailingSlash: 'always',
 });
