@@ -1,15 +1,15 @@
 // With `output: 'static'` configured:
 export const prerender = false;
 
-import type { APIRoute } from "astro";
-import { supabase } from "../../../lib/supabase";
+import type { APIRoute } from 'astro';
+import { supabase } from '../../../lib/supabase';
 
 export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const formData = await request.formData();
-  const email = formData.get("email")?.toString();
+  const email = formData.get('email')?.toString();
 
   if (!email) {
-    return new Response("Email is required", { status: 400 });
+    return new Response('Email is required', { status: 400 });
   }
 
   const { data, error } = await supabase.auth.signInWithOtp({
@@ -25,5 +25,5 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   // Redirect to the verification page with the email as a parameter
-  return redirect(`/verify-otp?email=${encodeURIComponent(email)}`);
+  return redirect(`/verify-otp/?email=${encodeURIComponent(email)}`);
 };
