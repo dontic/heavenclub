@@ -7,6 +7,8 @@ import Layout from './Layout.astro';
 import Header from '~/components/common/Header.astro';
 import Footer from '~/components/common/Footer.astro';
 import { NAVIGATION } from '~/config';
+import { Image } from 'astro:assets';
+import japaneseWaves from '~/assets/images/japanese-waves.webp';
 
 // Props
 // - hasBgPattern: boolean
@@ -34,7 +36,19 @@ const { metadata } = Astro.props;
     <slot name="header">
       <Header {...NAVIGATION.header} />
     </slot>
-    <main class="flex-grow">
+    <main class="flex-grow relative">
+      {/* Background Pattern */}
+      {
+        (
+          <div
+            class="absolute inset-x-0 bottom-0 rotate-0 h-96 opacity-60 [mask-image:linear-gradient(to_bottom,transparent,white)]"
+            style="z-index: -1;"
+          >
+            <Image src={japaneseWaves} alt="Japanese waves pattern" class="w-full h-full object-cover" />
+          </div>
+        )
+      }
+
       <slot />
     </main>
 
