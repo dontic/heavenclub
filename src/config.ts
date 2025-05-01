@@ -63,7 +63,16 @@ export const SITE: SiteConfig = {
 
 export const NAVIGATION: NavigationConfig = {
   header: {
-    links: [],
+    links: [
+      // {
+      //   text: 'Inicio',
+      //   href: '/',
+      // },
+      // {
+      //   text: 'Programas',
+      //   href: '/programs/',
+      // },
+    ],
     actions: [
       {
         href: '/signin/',
