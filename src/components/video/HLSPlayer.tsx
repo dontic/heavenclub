@@ -109,12 +109,6 @@ export default function HLSPlayer({
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50">
           <div className="text-center p-4">
             <p className="text-red-500 font-medium">Error al cargar el video</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-2 px-4 py-2 bg-primary text-white rounded hover:bg-opacity-90"
-            >
-              Reintentar
-            </button>
           </div>
         </div>
       )}
