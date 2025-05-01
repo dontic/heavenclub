@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import HLSPlayer from './HLSPlayer';
 import supabase from '~/lib/supabase';
 import LoadingSpinner from '../common/LoadingSpinner';
+import LogoutButton from '../authentication/LogoutButton';
 
 const Dashboard = () => {
   /* --------------------------------- STATES --------------------------------- */
@@ -52,6 +53,8 @@ const Dashboard = () => {
           <h2 className="text-xl font-semibold mb-4">El tiempo en Heaven</h2>
           <p>Disponible próximamente</p>
         </div>
+
+        <LogoutButton />
 
         <div className="mb-40"></div>
       </section>
