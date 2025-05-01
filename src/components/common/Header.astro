@@ -72,9 +72,13 @@ const currentPath = `/${new URL(Astro.url).pathname}/`;
         <Logo />
       </a>
 
-      <div class="flex items-center md:hidden">
-        <ToggleMenu />
-      </div>
+      {
+        links.length > 0 && (
+          <div class="flex items-center md:hidden">
+            <ToggleMenu />
+          </div>
+        )
+      }
     </div>
 
     <nav
