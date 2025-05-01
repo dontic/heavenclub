@@ -198,6 +198,14 @@ const currentPath = `/${new URL(Astro.url).pathname}/`;
     display: inline-block;
   }
 
+  /* Center the actions container in mobile view */
+  @media (max-width: 767px) {
+    #header.expanded .items-center.flex.justify-between {
+      justify-content: center !important;
+      margin: 1rem 0;
+    }
+  }
+
   @media (min-width: 768px) {
     #header.h-screen {
       display: block;
