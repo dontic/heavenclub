@@ -7,7 +7,9 @@
 
   /* Custom colors */
   --color-primary: #e8934a;
-  --color-secondary: #e3bb52;
+  --color-primary-light: #e3bb52;
+  --color-secondary: #6fa797;
+  --color-secondary-light: #a1f3dc;
   --color-default: rgb(16 16 16);
   --color-muted: rgb(16 16 16 / 66%);
   --color-page: rgb(255 255 255);
@@ -49,7 +51,7 @@
 
 /* Call to action button styles */
 .cta-gradient {
-  @apply bg-gradient-to-r from-primary to-secondary text-white px-8 py-3 rounded-full transition-colors;
+  @apply bg-gradient-to-r from-primary to-primary-light text-white px-8 py-3 rounded-full transition-colors;
 }
 
 .cta-gradient:hover {
@@ -61,7 +63,15 @@
 }
 
 .cta-primary:hover {
-  @apply bg-secondary cursor-pointer;
+  @apply bg-primary-light cursor-pointer;
+}
+
+.cta-gradient-secondary {
+  @apply bg-gradient-to-r from-secondary to-secondary-light text-white px-8 py-3 rounded-full transition-colors;
+}
+
+.cta-gradient-secondary:hover {
+  @apply bg-secondary from-secondary to-secondary cursor-pointer;
 }
 
 .cta-secondary {
@@ -69,5 +79,5 @@
 }
 
 .cta-secondary:hover {
-  @apply bg-primary cursor-pointer;
+  @apply bg-secondary-light cursor-pointer;
 }
