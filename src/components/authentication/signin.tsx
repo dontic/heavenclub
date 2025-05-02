@@ -70,9 +70,7 @@ export default function SignIn({ onSuccess }: SignInProps) {
       if (error) {
         // Check for "Signups not allowed" error and display a more user-friendly message
         if (error.message.includes('Signups not allowed')) {
-          setErrorMessage(
-            'Este correo electrónico no está registrado como socio. Por favor, contacta con el club para más información.'
-          );
+          setErrorMessage('Este correo electrónico no está registrado como socio.');
         } else {
           setErrorMessage(error.message);
         }
@@ -165,6 +163,12 @@ export default function SignIn({ onSuccess }: SignInProps) {
             <span>Entrar</span>
           )}
         </button>
+        <p className="mt-3 text-center text-sm text-gray-600">
+          ¿Quieres unirte al club?{' '}
+          <a href="/contact/" className="text-indigo-600 hover:text-indigo-800 font-medium">
+            Haz clic aquí
+          </a>
+        </p>
       </div>
     </form>
   );
@@ -243,7 +247,17 @@ export default function SignIn({ onSuccess }: SignInProps) {
         {/* <p className="mt-2 text-center text-sm font-medium text-amber-600">
           ⚠️ Solo los miembros del club pueden acceder a esta área
         </p> */}
-        {errorMessage && <p className="mt-2 text-center text-sm font-medium text-red-600">{errorMessage}</p>}
+        {errorMessage && errorMessage.includes('no está registrado como socio') ? (
+          <p className="mt-2 text-center text-sm font-medium text-red-600">
+            Este correo electrónico no está registrado como socio. Por favor,{' '}
+            <a href="/contact/" className="underline hover:text-red-800">
+              contacta con el club
+            </a>{' '}
+            para más información.
+          </p>
+        ) : errorMessage ? (
+          <p className="mt-2 text-center text-sm font-medium text-red-600">{errorMessage}</p>
+        ) : null}
       </div>
 
       {state === 'EMAIL_INPUT' ? renderEmailForm() : state === 'OTP_INPUT' ? renderOtpForm() : null}
