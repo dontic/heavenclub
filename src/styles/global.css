@@ -49,7 +49,7 @@
 
 /* Call to action button styles */
 .cta-gradient {
-  @apply bg-gradient-to-r from-secondary to-primary text-white px-8 py-3 rounded-full transition-colors;
+  @apply bg-gradient-to-r from-primary to-secondary text-white px-8 py-3 rounded-full transition-colors;
 }
 
 .cta-gradient:hover {
