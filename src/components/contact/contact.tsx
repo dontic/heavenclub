@@ -38,6 +38,15 @@ const Contact = () => {
         return;
       }
 
+      // Call the edge function to send the notification email
+      const { error: emailError } = await supabase.functions.invoke('send-notification-email', {
+        body: { name, email, phone, message },
+      });
+
+      if (emailError) {
+        console.error('Error sending notification email:', emailError);
+      }
+
       // Reset form on success
       setName('');
       setEmail('');
