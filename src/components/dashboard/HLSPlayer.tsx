@@ -108,7 +108,7 @@ export default function HLSPlayer({
       {hasError && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100 bg-opacity-50">
           <div className="text-center p-4">
-            <p className="text-red-500 font-medium">Error al cargar el video</p>
+            <p className="text-red-500 font-medium">La cámara no está disponible en este momento</p>
           </div>
         </div>
       )}
