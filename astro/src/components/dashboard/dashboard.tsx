@@ -46,7 +46,11 @@ const Dashboard = () => {
 
         <div className="w-full max-w-3xl mb-8">
           <h2 className="text-xl font-semibold mb-4">Heaven Cam en vivo</h2>
-          <HLSPlayer className="w-full aspect-video" title="Heaven Cam en vivo" />
+          <HLSPlayer
+            streamUrl="https://cam.heavenclub.es/heaven_cam/index.m3u8"
+            className="w-full aspect-video"
+            title="Heaven Cam en vivo"
+          />
         </div>
 
         <div className="w-full max-w-3xl mb-8">

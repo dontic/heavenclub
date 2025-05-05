@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 type HLSPlayerProps = {
+  streamUrl: string;
   width?: string;
   height?: string;
   controls?: boolean;
@@ -10,6 +11,7 @@ type HLSPlayerProps = {
 };
 
 export default function HLSPlayer({
+  streamUrl,
   width = '100%',
   height = 'auto',
   controls = false,
@@ -20,8 +22,6 @@ export default function HLSPlayer({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-
-  const streamUrl = 'https://cam.heavenclub.es/heaven_cam/index.m3u8';
 
   useEffect(() => {
     if (!videoRef.current) return;
