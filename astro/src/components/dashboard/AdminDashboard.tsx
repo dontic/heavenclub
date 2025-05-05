@@ -131,11 +131,11 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 flex flex-col items-center">
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
 
       {/* Invitation Form */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div className="bg-white rounded-lg shadow-md p-6 mb-8 w-full max-w-2xl">
         <h2 className="text-xl font-semibold mb-4">Invite New User</h2>
 
         {errorMessage && <p className="mb-4 text-sm font-medium text-red-600">{errorMessage}</p>}
@@ -188,7 +188,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Invitations Table */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-3xl">
         <h2 className="text-xl font-semibold mb-4">Invited Users</h2>
 
         {invitations.length === 0 ? (
