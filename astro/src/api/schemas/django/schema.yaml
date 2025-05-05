@@ -1,0 +1,127 @@
+openapi: 3.0.3
+info:
+  title: API
+  version: 1.0.0
+  description: Description placeholder
+paths:
+  /api/invitations/:
+    get:
+      operationId: invitations_list
+      description: |-
+        ViewSet for managing invitations
+        - Create: Create a new invitation
+        - Destroy: Delete an invitation
+      tags:
+      - invitations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invitation'
+          description: ''
+    post:
+      operationId: invitations_create
+      description: Create a new invitation
+      tags:
+      - invitations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InvitationCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InvitationCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationCreate'
+          description: ''
+  /api/invitations/{user}/:
+    delete:
+      operationId: invitations_destroy
+      description: Delete invitation and associated user
+      parameters:
+      - in: path
+        name: user
+        schema:
+          type: integer
+        description: A unique value identifying this invitation.
+        required: true
+      tags:
+      - invitations
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Invitation:
+      type: object
+      description: Serializer for the Invitation model
+      properties:
+        email:
+          type: string
+          format: email
+          readOnly: true
+        invitation_accepted:
+          type: boolean
+          readOnly: true
+        invitation_accepted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - invitation_accepted
+      - invitation_accepted_at
+    InvitationCreate:
+      type: object
+      description: Serializer for creating invitations
+      properties:
+        email:
+          type: string
+          format: email
+        send_email:
+          type: boolean
+          default: true
+      required:
+      - email
+    InvitationCreateRequest:
+      type: object
+      description: Serializer for creating invitations
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        send_email:
+          type: boolean
+          default: true
+      required:
+      - email
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
