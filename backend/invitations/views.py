@@ -27,13 +27,15 @@ class UserViewSet(
     """
     ViewSet for managing users
     - Create: Create a new user
-    - Destroy: Delete a user
+    - Destroy: Delete a user by email
     - List: List all users
     """
 
     permission_classes = [IsOwnerOrAdmin]
     serializer_class = UserSerializer
     queryset = User.objects.all()
+    lookup_field = "email"
+    lookup_value_regex = "[^/]+"  # Allow any character except forward slash
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -93,23 +95,13 @@ class UserViewSet(
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
     def destroy(self, request, *args, **kwargs):
-        """Delete user"""
+        """Delete user by email"""
         user = self.get_object()
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_object(self):
-        """Get user object based on lookup field"""
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-        lookup_value = self.kwargs[lookup_url_kwarg]
-
-        # If lookup is by ID
-        if lookup_value.isdigit():
-            filter_kwargs = {"id": lookup_value}
-        else:
-            # Otherwise assume it's an email
-            filter_kwargs = {"email": lookup_value}
-
-        obj = User.objects.get(**filter_kwargs)
+        """Get user object based on email"""
+        obj = super().get_object()
         self.check_object_permissions(self.request, obj)
         return obj
