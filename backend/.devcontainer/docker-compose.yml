@@ -1,6 +1,6 @@
 # docker-compose.yml
 
-name: autovisita-backend
+name: heaven-club-backend
 services:
   redis:
     image: redis:alpine
