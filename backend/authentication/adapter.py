@@ -1,5 +1,7 @@
 # django
+import string
 from django.conf import settings
+from django.utils.crypto import get_random_string
 
 # allauth
 from allauth.account.adapter import DefaultAccountAdapter
@@ -94,6 +96,14 @@ class CustomAccountAdapter(DefaultAccountAdapter):
             email=email,
             data_variables=email_context,
         )
+
+    def _generate_code(self, length=6):
+        forbidden_chars = "0OI18B2ZAEU"
+        # allowed_chars = string.ascii_uppercase + string.digits
+        allowed_chars = string.digits
+        for ch in forbidden_chars:
+            allowed_chars = allowed_chars.replace(ch, "")
+        return get_random_string(length=length, allowed_chars=allowed_chars)
 
 
 class CustomHeadlessAdapter(DefaultHeadlessAdapter):
