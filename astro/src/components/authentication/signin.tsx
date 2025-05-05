@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
-import supabase from '~/lib/supabase';
+import {
+  postAllauthClientV1AuthCodeRequest,
+  postAllauthClientV1AuthCodeConfirm,
+} from '~/api/allauth/authentication-login-by-code/authentication-login-by-code';
+import { getAllauthClientV1AuthSession } from '~/api/allauth/authentication-current-session/authentication-current-session';
 
 type SignInState = 'EMAIL_INPUT' | 'OTP_INPUT' | 'ERROR';
 
@@ -34,9 +38,9 @@ export default function SignIn({ onSuccess }: SignInProps) {
     const checkAuthentication = async () => {
       try {
         setCheckingAuth(true);
-        const { data } = await supabase.auth.getSession();
+        const response = await getAllauthClientV1AuthSession('browser');
 
-        if (data.session) {
+        if (response.data?.user) {
           // User is already authenticated, redirect to dashboard
           if (onSuccess) {
             onSuccess();
@@ -60,30 +64,26 @@ export default function SignIn({ onSuccess }: SignInProps) {
     setErrorMessage('');
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: false,
-        },
-      });
-
-      if (error) {
-        // Check for "Signups not allowed" error and display a more user-friendly message
-        if (error.message.includes('Signups not allowed')) {
-          setErrorMessage('Este correo electrónico no está registrado como socio.');
-        } else {
-          setErrorMessage(error.message);
-        }
-        setState('EMAIL_INPUT');
-
-        return;
-      }
-
+      await postAllauthClientV1AuthCodeRequest('browser', { email });
       setState('OTP_INPUT');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending OTP:', error);
-      setErrorMessage('Error al enviar el código de verificación');
-      setState('EMAIL_INPUT');
+
+      // Handle error response
+      if (error.response?.status === 401) {
+        // 401 means the code was sent successfully but user is not authenticated yet
+        setState('OTP_INPUT');
+      } else if (error.response?.status === 404) {
+        setErrorMessage('Este correo electrónico no está registrado como socio.');
+        setState('EMAIL_INPUT');
+      } else if (error.response?.data?.errors) {
+        const errorData = error.response.data.errors;
+        setErrorMessage(errorData[0]?.message || 'Error al enviar el código de verificación');
+        setState('EMAIL_INPUT');
+      } else {
+        setErrorMessage('Error al enviar el código de verificación');
+        setState('EMAIL_INPUT');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -95,19 +95,9 @@ export default function SignIn({ onSuccess }: SignInProps) {
     setErrorMessage('');
 
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        email,
-        token: otp,
-        type: 'email',
-      });
+      const response = await postAllauthClientV1AuthCodeConfirm('browser', { code: otp });
 
-      if (error) {
-        setErrorMessage(error.message);
-        setState('OTP_INPUT');
-        return;
-      }
-
-      if (data?.session) {
+      if (response.data?.user) {
         // Redirect to dashboard or call a success callback
         if (onSuccess) {
           onSuccess();
@@ -118,9 +108,17 @@ export default function SignIn({ onSuccess }: SignInProps) {
         setErrorMessage('No se pudo crear la sesión');
         setState('EMAIL_INPUT');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error verifying OTP:', error);
-      setErrorMessage('Error al verificar el código');
+
+      // Handle error response
+      if (error.response?.data?.errors) {
+        const errorData = error.response.data.errors;
+        setErrorMessage(errorData[0]?.message || 'Error al verificar el código');
+      } else {
+        setErrorMessage('Error al verificar el código');
+      }
+
       setState('OTP_INPUT');
     } finally {
       setIsSubmitting(false);
@@ -247,7 +245,7 @@ export default function SignIn({ onSuccess }: SignInProps) {
         {/* <p className="mt-2 text-center text-sm font-medium text-amber-600">
           ⚠️ Solo los miembros del club pueden acceder a esta área
         </p> */}
-        {errorMessage && errorMessage.includes('no está registrado como socio') ? (
+        {errorMessage === 'Este correo electrónico no está registrado como socio.' ? (
           <p className="mt-2 text-center text-sm font-medium text-red-600">
             Este correo electrónico no está registrado como socio. Por favor,{' '}
             <a href="/contact/" className="underline hover:text-red-800">

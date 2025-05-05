@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import HLSPlayer from './HLSPlayer';
-import supabase from '~/lib/supabase';
 import LoadingSpinner from '../common/LoadingSpinner';
 import LogoutButton from '../authentication/LogoutButton';
+import { getAllauthClientV1AuthSession } from '~/api/allauth/authentication-current-session/authentication-current-session';
 
 const Dashboard = () => {
   /* --------------------------------- STATES --------------------------------- */
@@ -15,8 +15,8 @@ const Dashboard = () => {
 
     const checkAuthentication = async () => {
       try {
-        const { data } = await supabase.auth.getSession();
-        if (!data.session) {
+        const response = await getAllauthClientV1AuthSession('browser');
+        if (!response.data?.user) {
           // Redirect to signin page if user is not authenticated
           window.location.href = '/signin/';
         } else {
@@ -24,6 +24,8 @@ const Dashboard = () => {
         }
       } catch (error) {
         console.error('Authentication error:', error);
+        // Redirect to signin page if there's an authentication error
+        window.location.href = '/signin/';
       }
     };
 

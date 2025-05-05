@@ -4,8 +4,8 @@ import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
 
 export const customAxios = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  timeout: import.meta.env.VITE_API_TIMEOUT,
+  baseURL: 'http://10.11.12.21:8000',
+  timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
   withXSRFToken: true,
