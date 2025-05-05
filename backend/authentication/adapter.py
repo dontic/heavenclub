@@ -104,12 +104,13 @@ class CustomHeadlessAdapter(DefaultHeadlessAdapter):
         partly authenticated scenario's (e.g. password reset, email
         verification).
 
-        Modified the serializer to include first name
+        Modified the serializer to include first name and role
         """
         ret = {
             "id": user.pk,
             "display": user.get_full_name(),
             "has_usable_password": user.has_usable_password(),
+            "role": user.role,
         }
         email = user.email
         if email:

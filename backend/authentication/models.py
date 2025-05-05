@@ -13,12 +13,18 @@ from .managers import EmailUsernameUserManager
 
 # User model with email as the unique identifier
 class User(AbstractBaseUser, PermissionsMixin):
+    class Role(models.TextChoices):
+        OWNER = "OWNER", "Owner"
+        ADMIN = "ADMIN", "Admin"
+        USER = "USER", "User"
+
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=30, blank=True)
     last_name = models.CharField(max_length=30, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
+    role = models.CharField(max_length=10, choices=Role.choices, default=Role.USER)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
