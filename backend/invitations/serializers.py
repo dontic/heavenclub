@@ -1,32 +1,29 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from .models import Invitation
 
 User = get_user_model()
 
 
-class InvitationSerializer(serializers.ModelSerializer):
-    """Serializer for the Invitation model"""
-
-    email = serializers.EmailField(source="user.email", read_only=True)
+class UserSerializer(serializers.ModelSerializer):
+    """Serializer for user data with invitation-like behavior"""
 
     class Meta:
-        model = Invitation
+        model = User
         fields = [
             "email",
-            "invitation_accepted",
-            "invitation_accepted_at",
-            "created_at",
+            "last_login",
+            "date_joined",
+            "is_active",
         ]
         read_only_fields = [
-            "invitation_accepted",
-            "invitation_accepted_at",
-            "created_at",
+            "last_login",
+            "date_joined",
+            "is_active",
         ]
 
 
-class InvitationCreateSerializer(serializers.Serializer):
-    """Serializer for creating invitations"""
+class UserCreateSerializer(serializers.Serializer):
+    """Serializer for creating users (replacing invitation creation)"""
 
     email = serializers.EmailField()
     send_email = serializers.BooleanField(default=True)
@@ -34,9 +31,16 @@ class InvitationCreateSerializer(serializers.Serializer):
     def validate_email(self, value):
         """Validate that the email is not already registered"""
         if User.objects.filter(email=value).exists():
-            user = User.objects.get(email=value)
-            if hasattr(user, "invitation"):
-                raise serializers.ValidationError(
-                    "This user already has an invitation."
-                )
+            raise serializers.ValidationError("This user already exists.")
         return value
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    """Serializer for listing users"""
+
+    created_at = serializers.DateTimeField(source="date_joined", read_only=True)
+
+    class Meta:
+        model = User
+        fields = ["email", "last_login", "created_at"]
+        read_only_fields = ["email", "last_login", "created_at"]
