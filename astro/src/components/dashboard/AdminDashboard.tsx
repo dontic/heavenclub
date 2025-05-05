@@ -4,11 +4,11 @@ import { getAllauthClientV1AuthSession } from '~/api/allauth/authentication-curr
 import { invitationsList, invitationsCreate, invitationsDestroy } from '~/api/django/invitations/invitations';
 import type { UserList, UserCreateRequest } from '~/api/django/api.schemas';
 
-// Extended Invitation type to include a user_id property
-interface InvitationWithId extends UserList {
+// Extended User type to include a user_id property
+interface UserWithId extends UserList {
   user_id?: number;
-  invitation_accepted?: boolean;
-  invitation_accepted_at?: string | null;
+  user_accepted?: boolean;
+  user_accepted_at?: string | null;
 }
 
 const AdminDashboard = () => {
@@ -17,7 +17,7 @@ const AdminDashboard = () => {
   const [email, setEmail] = useState('');
   const [sendEmail, setSendEmail] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [invitations, setInvitations] = useState<InvitationWithId[]>([]);
+  const [users, setUsers] = useState<UserWithId[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -41,8 +41,8 @@ const AdminDashboard = () => {
             window.location.href = '/dashboard/';
           } else {
             setIsLoading(false);
-            // Fetch invitations after confirming authorization
-            fetchInvitations();
+            // Fetch users after confirming authorization
+            fetchUsers();
           }
         }
       } catch (error) {
@@ -56,73 +56,73 @@ const AdminDashboard = () => {
   }, []);
 
   /* --------------------------------- METHODS -------------------------------- */
-  // Fetch all invitations
-  const fetchInvitations = async () => {
+  // Fetch all users
+  const fetchUsers = async () => {
     try {
-      const invitationsData = await invitationsList();
+      const usersData = await invitationsList();
 
       // Transform API data to match our interface
-      // Since the new API endpoint may not provide invitation status directly
-      const invitationsWithIds = invitationsData.map((invitation, index) => ({
-        ...invitation,
+      // Since the new API endpoint may not provide user status directly
+      const usersWithIds = usersData.map((user, index) => ({
+        ...user,
         user_id: index + 1, // Mock ID based on position
-        // Note: In a real implementation, you might want to determine invitation status
+        // Note: In a real implementation, you might want to determine user status
         // based on last_login or other user properties from the API
-        invitation_accepted: invitation.last_login !== null, // Consider it accepted if they've logged in
-        invitation_accepted_at: invitation.last_login, // Use last_login as acceptance date
+        user_accepted: user.last_login !== null, // Consider it accepted if they've logged in
+        user_accepted_at: user.last_login, // Use last_login as acceptance date
       }));
 
-      setInvitations(invitationsWithIds);
+      setUsers(usersWithIds);
     } catch (error) {
-      console.error('Error fetching invitations:', error);
+      console.error('Error fetching users:', error);
     }
   };
 
-  // Handle invitation form submission
-  const handleInvitationSubmit = async (e: React.FormEvent) => {
+  // Handle user form submission
+  const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMessage('');
     setSuccessMessage('');
 
     try {
-      const invitationData: UserCreateRequest = {
+      const userData: UserCreateRequest = {
         email,
         send_email: sendEmail,
       };
 
-      await invitationsCreate(invitationData);
+      await invitationsCreate(userData);
 
       // Reset form and show success message
       setEmail('');
       setSendEmail(true);
-      setSuccessMessage('Invitation sent successfully');
+      setSuccessMessage('User added successfully');
 
-      // Refresh invitations list
-      fetchInvitations();
+      // Refresh users list
+      fetchUsers();
     } catch (error: any) {
-      console.error('Error creating invitation:', error);
+      console.error('Error creating user:', error);
 
       if (error.response?.data?.errors) {
         const errorData = error.response.data.errors;
-        setErrorMessage(errorData[0]?.message || 'Error creating invitation');
+        setErrorMessage(errorData[0]?.message || 'Error adding user');
       } else {
-        setErrorMessage('Error creating invitation');
+        setErrorMessage('Error adding user');
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Handle invitation deletion
-  const handleDeleteInvitation = async (email: string) => {
-    if (window.confirm('Are you sure you want to delete this invitation?')) {
+  // Handle user deletion
+  const handleDeleteUser = async (email: string) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
       try {
         await invitationsDestroy(email);
-        // Refresh invitations list after successful deletion
-        fetchInvitations();
+        // Refresh users list after successful deletion
+        fetchUsers();
       } catch (error) {
-        console.error('Error deleting invitation:', error);
+        console.error('Error deleting user:', error);
       }
     }
   };
@@ -140,14 +140,14 @@ const AdminDashboard = () => {
     <div className="container mx-auto px-4 py-8 flex flex-col items-center">
       <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
 
-      {/* Invitation Form */}
+      {/* User Form */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8 w-full max-w-2xl">
-        <h2 className="text-xl font-semibold mb-4">Invite New User</h2>
+        <h2 className="text-xl font-semibold mb-4">Add New User</h2>
 
         {errorMessage && <p className="mb-4 text-sm font-medium text-red-600">{errorMessage}</p>}
         {successMessage && <p className="mb-4 text-sm font-medium text-green-600">{successMessage}</p>}
 
-        <form onSubmit={handleInvitationSubmit}>
+        <form onSubmit={handleUserSubmit}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email Address
@@ -184,21 +184,21 @@ const AdminDashboard = () => {
           >
             {isSubmitting ? (
               <>
-                <span className="ml-2">Inviting...</span>
+                <span className="ml-2">Adding...</span>
               </>
             ) : (
-              'Send Invitation'
+              'Add User'
             )}
           </button>
         </form>
       </div>
 
-      {/* Invitations Table */}
+      {/* Users Table */}
       <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-3xl">
-        <h2 className="text-xl font-semibold mb-4">Invited Users</h2>
+        <h2 className="text-xl font-semibold mb-4">Users</h2>
 
-        {invitations.length === 0 ? (
-          <p className="text-gray-500">No invitations found.</p>
+        {users.length === 0 ? (
+          <p className="text-gray-500">No users found.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -231,22 +231,17 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {invitations.map((invitation) => (
-                  <tr key={invitation.user_id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {invitation.email}
+                {users.map((user) => (
+                  <tr key={user.user_id}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(user.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(invitation.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {invitation.last_login ? new Date(invitation.last_login).toLocaleDateString() : '-'}
+                      {user.last_login ? new Date(user.last_login).toLocaleDateString() : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleDeleteInvitation(invitation.email)}
-                        className="text-red-600 hover:text-red-900"
-                      >
+                      <button onClick={() => handleDeleteUser(user.email)} className="text-red-600 hover:text-red-900">
                         Delete
                       </button>
                     </td>
