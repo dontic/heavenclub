@@ -7,6 +7,7 @@ import { getAllauthClientV1AuthSession } from '~/api/allauth/authentication-curr
 const Dashboard = () => {
   /* --------------------------------- STATES --------------------------------- */
   const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | undefined>(undefined);
 
   /* --------------------------------- EFFECTS -------------------------------- */
   // Check authentication on component mount
@@ -20,6 +21,7 @@ const Dashboard = () => {
           // Redirect to signin page if user is not authenticated
           window.location.href = '/signin/';
         } else {
+          setUserRole(response.data.user.role);
           setIsLoading(false);
         }
       } catch (error) {
@@ -41,10 +43,23 @@ const Dashboard = () => {
     );
   }
 
+  const isAdmin = userRole === 'ADMIN' || userRole === 'OWNER';
+
   return (
     <div id="dashboard" className="mx-4">
       <section className="relative w-full h-full flex flex-col items-center justify-center mt-20">
         <h1 className="text-2xl font-bold mb-6">Portal de socios</h1>
+
+        {isAdmin && (
+          <div className="w-full max-w-3xl mb-6 text-center">
+            <a
+              href="/admin/"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors duration-200"
+            >
+              Portal administrativo
+            </a>
+          </div>
+        )}
 
         <div className="w-full max-w-3xl mb-8">
           <h2 className="text-xl font-semibold mb-4">Heaven Cam en vivo</h2>
