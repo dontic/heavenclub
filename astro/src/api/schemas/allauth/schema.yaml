@@ -2706,6 +2706,15 @@ components:
           $ref: '#/components/schemas/Email'
         username:
           $ref: '#/components/schemas/Username'
+        role:
+          type: string
+          description: |
+            The user's role in the system.
+          enum:
+            - USER
+            - ADMIN
+            - OWNER
+          example: USER
     EmailAddress:
       type: object
       properties:

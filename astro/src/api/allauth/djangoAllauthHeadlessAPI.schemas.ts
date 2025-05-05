@@ -571,6 +571,19 @@ export type ProviderAccountID = string;
  */
 export type UserId = number | string;
 
+/**
+ * The user's role in the system.
+
+ */
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+// eslint-disable-next-line @typescript-eslint/no-redeclare
+export const UserRole = {
+  USER: 'USER',
+  ADMIN: 'ADMIN',
+  OWNER: 'OWNER',
+} as const;
+
 export interface User {
   /** The user ID.
    */
@@ -583,6 +596,9 @@ export interface User {
   has_usable_password?: boolean;
   email?: Email;
   username?: Username;
+  /** The user's role in the system.
+   */
+  role?: UserRole;
 }
 
 export interface EmailAddress {
