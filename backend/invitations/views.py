@@ -5,6 +5,11 @@ from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.conf import settings
+from django.db import transaction
+from allauth.account.utils import user_email, user_pk_to_url_str
+from allauth.account.utils import user_username
+from allauth.account.models import EmailAddress
+from allauth.account.adapter import get_adapter
 
 from utils.loops import send_transactional_email_task
 from .models import Invitation
@@ -36,30 +41,55 @@ class InvitationViewSet(viewsets.ModelViewSet):
         email = serializer.validated_data["email"]
         send_email = serializer.validated_data["send_email"]
 
-        # Create a new user with the email if it doesn't exist
-        user, created = User.objects.get_or_create(
-            email=email, defaults={"is_active": True, "role": "USER"}
-        )
+        # Check if the user already exists
+        user_exists = User.objects.filter(email=email).exists()
+        if user_exists:
+            user = User.objects.get(email=email)
+            if hasattr(user, "invitation"):
+                return Response(
+                    {"error": "This user already has an invitation."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-        # Create invitation for the user
-        invitation, created = Invitation.objects.get_or_create(
-            user=user,
-            defaults={"invitation_accepted": False, "created_at": timezone.now()},
-        )
+        with transaction.atomic():
+            # Create a new user using allauth pattern if doesn't exist
+            if not user_exists:
+                # Create a user with an unusable password
+                user = User.objects.create(email=email, is_active=True, role="USER")
+                user.set_unusable_password()
+                user.save()
 
-        # Send invitation email if requested
-        if send_email:
-            # Using a placeholder transactional email ID
-            transaction_id = "placeholder_invitation_email_id"
+                # Create verified email record
+                EmailAddress.objects.create(
+                    user=user, email=email, primary=True, verified=False
+                )
 
-            # Prepare data for the email
-            data_variables = {
-                "user_email": email,
-                "invitation_link": f"{settings.FRONTEND_URL}/accept-invitation/{user.id}",
-            }
+            # Create invitation for the user
+            invitation, created = Invitation.objects.get_or_create(
+                user=user,
+                defaults={"invitation_accepted": False, "created_at": timezone.now()},
+            )
 
-            # Send the email using Loops
-            send_transactional_email_task.delay(transaction_id, email, data_variables)
+            # Send invitation email if requested
+            if send_email:
+                # Using a placeholder transactional email ID
+                transaction_id = "placeholder_invitation_email_id"
+
+                # Generate verification key if needed
+                email_address = EmailAddress.objects.get(user=user, email=email)
+                if not email_address.verified:
+                    email_address.send_confirmation(request)
+
+                # Prepare data for the invitation email
+                data_variables = {
+                    "user_email": email,
+                    "invitation_link": f"{settings.FRONTEND_URL}/accept-invitation/{user.id}",
+                }
+
+                # Send the invitation email using Loops
+                send_transactional_email_task.delay(
+                    transaction_id, email, data_variables
+                )
 
         # Return the created invitation
         return Response(
