@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, status, mixins, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.contrib.auth import get_user_model
@@ -19,9 +19,16 @@ from .permissions import IsOwnerOrAdmin
 User = get_user_model()
 
 
-class InvitationViewSet(viewsets.ModelViewSet):
+class InvitationViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
     """
     ViewSet for managing invitations
+    - Create: Create a new invitation
+    - Destroy: Delete an invitation
     """
 
     permission_classes = [IsOwnerOrAdmin]
