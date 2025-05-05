@@ -1,40 +1,38 @@
 // @ts-nocheck
-import type { Invitation, InvitationCreate, InvitationCreateRequest } from '../api.schemas';
+import type { UserCreate, UserCreateRequest, UserList } from '../api.schemas';
 
 import { customAxiosInstance } from '../../axios';
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 /**
- * ViewSet for managing invitations
-- Create: Create a new invitation
-- Destroy: Delete an invitation
+ * List all users with their information
  */
 export const invitationsList = (options?: SecondParameter<typeof customAxiosInstance>) => {
-  return customAxiosInstance<Invitation[]>({ url: `/api/invitations/`, method: 'GET' }, options);
+  return customAxiosInstance<UserList[]>({ url: `/api/invitations/`, method: 'GET' }, options);
 };
 /**
- * Create a new invitation
+ * Create a new user
  */
 export const invitationsCreate = (
-  invitationCreateRequest: InvitationCreateRequest,
+  userCreateRequest: UserCreateRequest,
   options?: SecondParameter<typeof customAxiosInstance>
 ) => {
-  return customAxiosInstance<InvitationCreate>(
+  return customAxiosInstance<UserCreate>(
     {
       url: `/api/invitations/`,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      data: invitationCreateRequest,
+      data: userCreateRequest,
     },
     options
   );
 };
 /**
- * Delete invitation and associated user
+ * Delete user by email
  */
-export const invitationsDestroy = (user: number, options?: SecondParameter<typeof customAxiosInstance>) => {
-  return customAxiosInstance<void>({ url: `/api/invitations/${user}/`, method: 'DELETE' }, options);
+export const invitationsDestroy = (email: string, options?: SecondParameter<typeof customAxiosInstance>) => {
+  return customAxiosInstance<void>({ url: `/api/invitations/${email}/`, method: 'DELETE' }, options);
 };
 
 type AwaitedInput<T> = PromiseLike<T> | T;

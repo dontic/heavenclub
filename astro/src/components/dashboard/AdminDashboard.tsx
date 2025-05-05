@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { getAllauthClientV1AuthSession } from '~/api/allauth/authentication-current-session/authentication-current-session';
 import { invitationsList, invitationsCreate, invitationsDestroy } from '~/api/django/invitations/invitations';
-import type { Invitation, InvitationCreateRequest } from '~/api/django/api.schemas';
+import type { UserList, UserCreateRequest } from '~/api/django/api.schemas';
 
 // Extended Invitation type to include a user_id property
-interface InvitationWithId extends Invitation {
+interface InvitationWithId extends UserList {
   user_id?: number;
+  invitation_accepted?: boolean;
+  invitation_accepted_at?: string | null;
 }
 
 const AdminDashboard = () => {
@@ -59,11 +61,15 @@ const AdminDashboard = () => {
     try {
       const invitationsData = await invitationsList();
 
-      // Add mock user IDs to invitations
-      // TODO: Replace with actual user IDs when API provides them
+      // Transform API data to match our interface
+      // Since the new API endpoint may not provide invitation status directly
       const invitationsWithIds = invitationsData.map((invitation, index) => ({
         ...invitation,
         user_id: index + 1, // Mock ID based on position
+        // Note: In a real implementation, you might want to determine invitation status
+        // based on last_login or other user properties from the API
+        invitation_accepted: invitation.last_login !== null, // Consider it accepted if they've logged in
+        invitation_accepted_at: invitation.last_login, // Use last_login as acceptance date
       }));
 
       setInvitations(invitationsWithIds);
@@ -80,7 +86,7 @@ const AdminDashboard = () => {
     setSuccessMessage('');
 
     try {
-      const invitationData: InvitationCreateRequest = {
+      const invitationData: UserCreateRequest = {
         email,
         send_email: sendEmail,
       };
@@ -109,10 +115,10 @@ const AdminDashboard = () => {
   };
 
   // Handle invitation deletion
-  const handleDeleteInvitation = async (userId: number) => {
+  const handleDeleteInvitation = async (email: string) => {
     if (window.confirm('Are you sure you want to delete this invitation?')) {
       try {
-        await invitationsDestroy(userId);
+        await invitationsDestroy(email);
         // Refresh invitations list after successful deletion
         fetchInvitations();
       } catch (error) {
@@ -220,7 +226,7 @@ const AdminDashboard = () => {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Date Accepted
+                    Last Login
                   </th>
                   <th
                     scope="col"
@@ -251,13 +257,11 @@ const AdminDashboard = () => {
                       {new Date(invitation.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {invitation.invitation_accepted_at
-                        ? new Date(invitation.invitation_accepted_at).toLocaleDateString()
-                        : '-'}
+                      {invitation.last_login ? new Date(invitation.last_login).toLocaleDateString() : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
-                        onClick={() => handleDeleteInvitation(invitation.user_id || 0)}
+                        onClick={() => handleDeleteInvitation(invitation.email)}
                         className="text-red-600 hover:text-red-900"
                       >
                         Delete

@@ -7,10 +7,7 @@ paths:
   /api/invitations/:
     get:
       operationId: invitations_list
-      description: |-
-        ViewSet for managing invitations
-        - Create: Create a new invitation
-        - Destroy: Delete an invitation
+      description: List all users with their information
       tags:
       - invitations
       security:
@@ -22,24 +19,24 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Invitation'
+                  $ref: '#/components/schemas/UserList'
           description: ''
     post:
       operationId: invitations_create
-      description: Create a new invitation
+      description: Create a new user
       tags:
       - invitations
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/InvitationCreateRequest'
+              $ref: '#/components/schemas/UserCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/InvitationCreateRequest'
+              $ref: '#/components/schemas/UserCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/InvitationCreateRequest'
+              $ref: '#/components/schemas/UserCreateRequest'
         required: true
       security:
       - cookieAuth: []
@@ -48,18 +45,18 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/InvitationCreate'
+                $ref: '#/components/schemas/UserCreate'
           description: ''
-  /api/invitations/{user}/:
+  /api/invitations/{email}/:
     delete:
       operationId: invitations_destroy
-      description: Delete invitation and associated user
+      description: Delete user by email
       parameters:
       - in: path
-        name: user
+        name: email
         schema:
-          type: integer
-        description: A unique value identifying this invitation.
+          type: string
+          pattern: ^[^/]+$
         required: true
       tags:
       - invitations
@@ -70,18 +67,40 @@ paths:
           description: No response body
 components:
   schemas:
-    Invitation:
+    UserCreate:
       type: object
-      description: Serializer for the Invitation model
+      description: Serializer for creating users (replacing invitation creation)
+      properties:
+        email:
+          type: string
+          format: email
+        send_email:
+          type: boolean
+          default: true
+      required:
+      - email
+    UserCreateRequest:
+      type: object
+      description: Serializer for creating users (replacing invitation creation)
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        send_email:
+          type: boolean
+          default: true
+      required:
+      - email
+    UserList:
+      type: object
+      description: Serializer for listing users
       properties:
         email:
           type: string
           format: email
           readOnly: true
-        invitation_accepted:
-          type: boolean
-          readOnly: true
-        invitation_accepted_at:
+        last_login:
           type: string
           format: date-time
           readOnly: true
@@ -93,33 +112,7 @@ components:
       required:
       - created_at
       - email
-      - invitation_accepted
-      - invitation_accepted_at
-    InvitationCreate:
-      type: object
-      description: Serializer for creating invitations
-      properties:
-        email:
-          type: string
-          format: email
-        send_email:
-          type: boolean
-          default: true
-      required:
-      - email
-    InvitationCreateRequest:
-      type: object
-      description: Serializer for creating invitations
-      properties:
-        email:
-          type: string
-          format: email
-          minLength: 1
-        send_email:
-          type: boolean
-          default: true
-      required:
-      - email
+      - last_login
   securitySchemes:
     cookieAuth:
       type: apiKey

@@ -1,28 +1,27 @@
 // @ts-nocheck
 /**
- * Serializer for the Invitation model
+ * Serializer for creating users (replacing invitation creation)
  */
-export interface Invitation {
-  readonly email: string;
-  readonly invitation_accepted: boolean;
-  /** @nullable */
-  readonly invitation_accepted_at: string | null;
-  readonly created_at: string;
-}
-
-/**
- * Serializer for creating invitations
- */
-export interface InvitationCreate {
+export interface UserCreate {
   email: string;
   send_email?: boolean;
 }
 
 /**
- * Serializer for creating invitations
+ * Serializer for creating users (replacing invitation creation)
  */
-export interface InvitationCreateRequest {
+export interface UserCreateRequest {
   /** @minLength 1 */
   email: string;
   send_email?: boolean;
+}
+
+/**
+ * Serializer for listing users
+ */
+export interface UserList {
+  readonly email: string;
+  /** @nullable */
+  readonly last_login: string | null;
+  readonly created_at: string;
 }
