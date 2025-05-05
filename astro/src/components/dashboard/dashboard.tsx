@@ -54,6 +54,15 @@ const Dashboard = () => {
         </div>
 
         <div className="w-full max-w-3xl mb-8">
+          <h2 className="text-xl font-semibold mb-4">Monteros Cam en vivo</h2>
+          <HLSPlayer
+            streamUrl="https://flus.spotfav.com:443/marbella-los-monteros-spotfav/index.m3u8?token=4cde82546522b95fd69e9527807195fad414b9c5-31134306-bea182a25c116318c722128da0e199794619c4ffe1ba03856d-1746465733-1746461833"
+            className="w-full aspect-video"
+            title="Monteros Cam en vivo"
+          />
+        </div>
+
+        <div className="w-full max-w-3xl mb-8">
           <h2 className="text-xl font-semibold mb-4">El tiempo en Heaven</h2>
           <p>Disponible próximamente</p>
         </div>
