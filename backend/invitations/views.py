@@ -90,7 +90,7 @@ class InvitationViewSet(
                 # Prepare data for the invitation email
                 data_variables = {
                     "user_email": email,
-                    "invitation_link": f"{settings.FRONTEND_URL}/accept-invitation/{user.id}",
+                    "invitation_link": f"{settings.FRONTEND_BASE_URL}/accept-invitation/{user.id}",
                 }
 
                 # Send the invitation email using Loops
