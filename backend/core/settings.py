@@ -186,6 +186,8 @@ INSTALLED_APPS = [
     "health_check.contrib.redis",  # requires Redis broker
     # ------------------------------ DJANGO CLEANUP ------------------------------ #
     "django_cleanup",
+    # ------------------------------ INVITATIONS --------------------------------- #
+    "invitations",  # Custom invitations app
 ]
 
 # ---------------------------------------------------------------------------- #

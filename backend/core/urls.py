@@ -32,6 +32,8 @@ urlpatterns = [
     # Include the API endpoints:
     path("_allauth/", include("allauth.headless.urls")),
     path(r"ht/", include("health_check.urls")),
+    # Invitations app endpoints
+    path("api/invitations/", include("invitations.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
