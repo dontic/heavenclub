@@ -14,8 +14,49 @@ permissions:
   pages: write
   id-token: write
 
+# Script environment variables
+env:
+  BE_DOCKER_IMAGE_NAME: heavenclub-be
+  DOCKER_REGISTRY: dockerregistry.local.hlab.es
+
 jobs:
-  build:
+  build-and-push-backend:
+    name: Build and Push Backend Docker Image
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get the tag name
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+      - name: Build and push Backend Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/docker/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:${{ steps.get_version.outputs.VERSION }}
+            ${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:latest
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:buildcache
+          cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:buildcache,mode=max
+
+  build-astro:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout your repository using git
@@ -27,7 +68,7 @@ jobs:
           # node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
           # package-manager: pnpm@latest # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
 
-  deploy:
+  deploy-astro:
     needs: build
     runs-on: ubuntu-latest
     environment:
