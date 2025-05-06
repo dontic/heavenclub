@@ -1,20 +1,15 @@
 services:
   # Postgres service
   # Comment out if using an external Postgres server
-  # postgres:
-  #   restart: unless-stopped
-  #   image: postgres:16-bullseye
-  #   environment:
-  #     POSTGRES_DB: ${POSTGRES_DB_NAME}
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #   volumes:
-  #     - ./postgresdata:/var/lib/postgresql/data
-  #     # Copy the provision_postgres.sql file to the container
-  #     - ./provision_postgres.sql:/docker-entrypoint-initdb.d/provision_postgres.sql
-  #   # Uncomment the following lines to expose the Postgres port
-  #   # ports:
-  #   #   - 5432:5432
+ postgres:
+   restart: unless-stopped
+   image: postgres:16-bullseye
+   environment:
+     POSTGRES_DB: heavenclub
+     POSTGRES_USER: heavenclub
+     POSTGRES_PASSWORD: heavenclub
+   volumes:
+     - postgres_data:/var/lib/postgresql/data
 
   # Redis service
   # Comment out if using an external Redis server
@@ -27,7 +22,7 @@ services:
 
   django:
     restart: unless-stopped
-    image: dockerregistry.hlab.es/autovisita-be:latest
+    image: dockerregistry.hlab.es/heavenclub-be:latest
     env_file:
       - ./.env
     entrypoint: /app/backend/docker/entrypoint-django.sh
@@ -44,7 +39,7 @@ services:
 
   worker:
     restart: unless-stopped
-    image: dockerregistry.hlab.es/autovisita-be:latest
+    image: dockerregistry.hlab.es/heavenclub-be:latest
     env_file:
       - ./.env
     entrypoint: /app/backend/docker/entrypoint-worker.sh
@@ -58,7 +53,7 @@ services:
 
   beat:
     restart: unless-stopped
-    image: dockerregistry.hlab.es/autovisita-be:latest
+    image: dockerregistry.hlab.es/heavenclub-be:latest
     env_file:
       - ./.env
     entrypoint: /app/backend/docker/entrypoint-beat.sh
@@ -67,3 +62,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+
+volumes:
+  postgres_data:
