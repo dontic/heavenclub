@@ -46,7 +46,7 @@ class UserViewSet(
 
     def list(self, request, *args, **kwargs):
         """List all users with their information"""
-        queryset = User.objects.all().order_by("-date_joined")
+        queryset = User.objects.filter(is_staff=False).order_by("-date_joined")
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
