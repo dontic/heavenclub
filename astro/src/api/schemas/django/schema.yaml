@@ -1,0 +1,191 @@
+openapi: 3.0.3
+info:
+  title: API
+  version: 1.0.0
+  description: Description placeholder
+paths:
+  /api/contacts/:
+    post:
+      operationId: contacts_create
+      description: Create a new contact request
+      tags:
+      - contacts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContactRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContactRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+          description: ''
+  /api/invitations/:
+    get:
+      operationId: invitations_list
+      description: List all users with their information
+      tags:
+      - invitations
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserList'
+          description: ''
+    post:
+      operationId: invitations_create
+      description: Create a new user
+      tags:
+      - invitations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreate'
+          description: ''
+  /api/invitations/{email}/:
+    delete:
+      operationId: invitations_destroy
+      description: Delete user by email
+      parameters:
+      - in: path
+        name: email
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      tags:
+      - invitations
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Contact:
+      type: object
+      description: Serializer for Contact model
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone:
+          type: string
+          maxLength: 50
+        message:
+          type: string
+      required:
+      - email
+      - message
+      - name
+    ContactRequest:
+      type: object
+      description: Serializer for Contact model
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        phone:
+          type: string
+          maxLength: 50
+        message:
+          type: string
+          minLength: 1
+      required:
+      - email
+      - message
+      - name
+    UserCreate:
+      type: object
+      description: Serializer for creating users (replacing invitation creation)
+      properties:
+        email:
+          type: string
+          format: email
+        send_email:
+          type: boolean
+          default: true
+      required:
+      - email
+    UserCreateRequest:
+      type: object
+      description: Serializer for creating users (replacing invitation creation)
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        send_email:
+          type: boolean
+          default: true
+      required:
+      - email
+    UserList:
+      type: object
+      description: Serializer for listing users
+      properties:
+        email:
+          type: string
+          format: email
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - last_login
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
