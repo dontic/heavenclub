@@ -21,10 +21,10 @@ def send_contact_notification(contact_id):
 
     # Prepare data variables for the email template
     data_variables = {
-        "CONTACT_NAME": contact.name,
-        "CONTACT_EMAIL": contact.email,
-        "CONTACT_PHONE": contact.phone,
-        "CONTACT_MESSAGE": contact.message,
+        "CONTACT_NAME": contact.name or "N/A",
+        "CONTACT_EMAIL": contact.email or "N/A",
+        "CONTACT_PHONE": contact.phone or "N/A",
+        "CONTACT_MESSAGE": contact.message or "N/A",
     }
 
     # List of recipients
