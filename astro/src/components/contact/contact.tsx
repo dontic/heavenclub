@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import supabase from '~/lib/supabase';
+import { contactsCreate } from '~/api/django/contacts/contacts';
+import type { ContactRequest } from '~/api/django/api.schemas';
 
 function LoadingSpinner() {
   return (
@@ -31,21 +32,14 @@ const Contact = () => {
     setSuccessMessage('');
 
     try {
-      const { error } = await supabase.from('contact_forms').insert([{ name, email, phone, message }]);
+      const contactData: ContactRequest = {
+        name,
+        email,
+        message,
+        ...(phone && { phone }),
+      };
 
-      if (error) {
-        setErrorMessage(error.message);
-        return;
-      }
-
-      // Call the edge function to send the notification email
-      const { error: emailError } = await supabase.functions.invoke('send-notification-email', {
-        body: { name, email, phone, message },
-      });
-
-      if (emailError) {
-        console.error('Error sending notification email:', emailError);
-      }
+      await contactsCreate(contactData);
 
       // Reset form on success
       setName('');
