@@ -469,18 +469,20 @@ if any(
     [
         "LOOPS_VERIFY_EMAIL_TRANSACTIONAL_ID" not in os.environ,
         "LOOPS_LOGIN_CODE_TRANSACTIONAL_ID" not in os.environ,
+        "LOOPS_INVITATION_TRANSACTIONAL_ID" not in os.environ,
     ]
 ):
     raise ValueError(
         """Not all Loops transactional IDs are set:
 - LOOPS_VERIFY_EMAIL_TRANSACTIONAL_ID
 - LOOPS_LOGIN_CODE_TRANSACTIONAL_ID
+- LOOPS_INVITATION_TRANSACTIONAL_ID
 """
     )
 
 LOOPS_VERIFY_EMAIL_TRANSACTIONAL_ID = os.getenv("LOOPS_VERIFY_EMAIL_TRANSACTIONAL_ID")
 LOOPS_LOGIN_CODE_TRANSACTIONAL_ID = os.getenv("LOOPS_LOGIN_CODE_TRANSACTIONAL_ID")
-
+LOOPS_INVITATION_TRANSACTIONAL_ID = os.getenv("LOOPS_INVITATION_TRANSACTIONAL_ID")
 
 # ---------------------------------------------------------------------------- #
 #                                 HEALTH CHECK                                 #

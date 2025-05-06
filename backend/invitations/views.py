@@ -73,7 +73,7 @@ class UserViewSet(
             # Send invitation email if requested
             if send_email:
                 # Using a placeholder transactional email ID
-                transaction_id = "placeholder_invitation_email_id"
+                transactional_id = settings.LOOPS_INVITATION_TRANSACTIONAL_ID
 
                 # Generate verification key if needed
                 email_address = EmailAddress.objects.get(user=user, email=email)
@@ -88,7 +88,7 @@ class UserViewSet(
 
                 # Send the invitation email using Loops
                 send_transactional_email_task.delay(
-                    transaction_id, email, data_variables
+                    transactional_id, email, data_variables
                 )
 
         # Return the created user
