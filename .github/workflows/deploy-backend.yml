@@ -1,11 +1,10 @@
-name: Deploy Heaven Club Backend
+name: Deploy Heaven Club Full Stack
 
 on:
-  # Trigger the workflow every time you push to the `main` branch
-  # Using a different branch name? Replace `main` with your branch's name
+  # Trigger the workflow on matching numeric semver pushed tags, i.e., 1.0.0, 20.15.10
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+'  # Push events to matching numeric semver tags, i.e., 1.0.0, 20.15.10
+      - '[0-9]+.[0-9]+.[0-9]+'
   # Allows you to run this workflow manually from the Actions tab on GitHub.
   workflow_dispatch:
 
@@ -15,8 +14,8 @@ env:
   DOCKER_REGISTRY: dockerregistry.local.hlab.es
 
 jobs:
-  build-and-push-backend:
-    name: Build and Push Backend Docker Image
+  build-and-deploy-backend:
+    name: Build and Deploy Backend
     runs-on: self-hosted
 
     steps:
@@ -50,3 +49,10 @@ jobs:
             ${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:latest
           cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:buildcache,mode=max
+
+      - name: Trigger Watchtower
+        uses: darnfish/watchtower-update@v3.3
+        with:
+          url: "${{ secrets.WATCHTOWER_URL }}"
+          api_token: "${{ secrets.WATCHTOWER_API_TOKEN }}"
+          # images: "${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}"
