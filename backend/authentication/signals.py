@@ -5,8 +5,8 @@ from django.conf import settings
 
 
 def terminate_other_sessions(sender, user, request, **kwargs):
-    # Only terminate other sessions if SINGLE_SESSION_PER_USER setting is enabled
-    if getattr(settings, "SINGLE_SESSION_PER_USER", True):
+    # Skip for superusers and only terminate other sessions if SINGLE_SESSION_PER_USER setting is enabled
+    if not user.is_superuser and getattr(settings, "SINGLE_SESSION_PER_USER", True):
         current_session_key = request.session.session_key
         sessions = Session.objects.filter(expire_date__gte=timezone.now())
         for session in sessions:
