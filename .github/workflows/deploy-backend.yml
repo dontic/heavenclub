@@ -14,8 +14,8 @@ env:
   DOCKER_REGISTRY: dockerregistry.local.hlab.es
 
 jobs:
-  build-and-deploy-backend:
-    name: Build and Deploy Backend
+  build-and-push-backend:
+    name: Build and Push Backend
     runs-on: self-hosted
 
     steps:
@@ -50,6 +50,12 @@ jobs:
           cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:buildcache,mode=max
 
+  deploy-backend:
+    name: Deploy Backend
+    needs: build-and-push-backend
+    runs-on: self-hosted
+
+    steps:
       - name: Trigger Watchtower
         uses: darnfish/watchtower-update@v3.3
         with:
