@@ -206,6 +206,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",  # Django AllAuth
+    "authentication.middleware.LastAccessedMiddleware",  # Track user last accessed time
 ]
 
 # ---------------------------------------------------------------------------- #

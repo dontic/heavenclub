@@ -55,6 +55,6 @@ export interface UserCreateRequest {
 export interface UserList {
   readonly email: string;
   /** @nullable */
-  readonly last_login: string | null;
+  readonly last_accessed: string | null;
   readonly created_at: string;
 }

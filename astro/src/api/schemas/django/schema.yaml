@@ -171,7 +171,7 @@ components:
           type: string
           format: email
           readOnly: true
-        last_login:
+        last_accessed:
           type: string
           format: date-time
           readOnly: true
@@ -183,7 +183,7 @@ components:
       required:
       - created_at
       - email
-      - last_login
+      - last_accessed
   securitySchemes:
     cookieAuth:
       type: apiKey
