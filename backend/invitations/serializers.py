@@ -11,12 +11,12 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             "email",
-            "last_login",
+            "last_accessed",
             "date_joined",
             "is_active",
         ]
         read_only_fields = [
-            "last_login",
+            "last_accessed",
             "date_joined",
             "is_active",
         ]
@@ -42,5 +42,5 @@ class UserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "last_login", "created_at"]
-        read_only_fields = ["email", "last_login", "created_at"]
+        fields = ["email", "last_accessed", "created_at"]
+        read_only_fields = ["email", "last_accessed", "created_at"]
