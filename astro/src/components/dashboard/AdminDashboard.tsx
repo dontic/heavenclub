@@ -103,9 +103,16 @@ const AdminDashboard = () => {
     } catch (error: any) {
       console.error('Error creating user:', error);
 
-      if (error.response?.data?.errors) {
-        const errorData = error.response.data.errors;
-        setErrorMessage(errorData[0]?.message || 'Error adding user');
+      if (error.response?.status === 400) {
+        const errorData = error.response.data;
+        if (errorData.email) {
+          setErrorMessage(errorData.email[0]);
+        } else if (error.response?.data?.errors) {
+          const errorData = error.response.data.errors;
+          setErrorMessage(errorData[0]?.message || 'Error adding user');
+        } else {
+          setErrorMessage('Error adding user');
+        }
       } else {
         setErrorMessage('Error adding user');
       }
