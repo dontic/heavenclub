@@ -68,8 +68,8 @@ const AdminDashboard = () => {
         user_id: index + 1, // Mock ID based on position
         // Note: In a real implementation, you might want to determine user status
         // based on last_login or other user properties from the API
-        user_accepted: user.last_login !== null, // Consider it accepted if they've logged in
-        user_accepted_at: user.last_login, // Use last_login as acceptance date
+        user_accepted: user.last_accessed !== null, // Consider it accepted if they've logged in
+        user_accepted_at: user.last_accessed, // Use last_login as acceptance date
       }));
 
       setUsers(usersWithIds);
@@ -220,7 +220,7 @@ const AdminDashboard = () => {
                     scope="col"
                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                   >
-                    Last Login
+                    Last Access
                   </th>
                   <th
                     scope="col"
@@ -238,7 +238,15 @@ const AdminDashboard = () => {
                       {new Date(user.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {user.last_login ? new Date(user.last_login).toLocaleDateString() : '-'}
+                      {user.last_accessed
+                        ? new Date(user.last_accessed).toLocaleString(undefined, {
+                            year: 'numeric',
+                            month: 'numeric',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })
+                        : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button onClick={() => handleDeleteUser(user.email)} className="text-red-600 hover:text-red-900">
