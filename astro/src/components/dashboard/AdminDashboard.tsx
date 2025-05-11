@@ -11,6 +11,10 @@ interface UserWithId extends UserList {
   user_accepted_at?: string | null;
 }
 
+// Sort types
+type SortField = 'email' | 'created_at' | 'last_accessed';
+type SortDirection = 'asc' | 'desc';
+
 const AdminDashboard = () => {
   /* --------------------------------- STATES --------------------------------- */
   const [isLoading, setIsLoading] = useState(true);
@@ -20,6 +24,8 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState<UserWithId[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [sortField, setSortField] = useState<SortField>('email');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   /* --------------------------------- EFFECTS -------------------------------- */
   // Check authentication and authorization on component mount
@@ -76,6 +82,40 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error fetching users:', error);
     }
+  };
+
+  // Sort users based on current sort field and direction
+  const sortedUsers = [...users].sort((a, b) => {
+    if (sortField === 'email') {
+      return sortDirection === 'asc' ? a.email.localeCompare(b.email) : b.email.localeCompare(a.email);
+    } else if (sortField === 'created_at') {
+      const dateA = new Date(a.created_at).getTime();
+      const dateB = new Date(b.created_at).getTime();
+      return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+    } else if (sortField === 'last_accessed') {
+      const dateA = a.last_accessed ? new Date(a.last_accessed).getTime() : 0;
+      const dateB = b.last_accessed ? new Date(b.last_accessed).getTime() : 0;
+      return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+    }
+    return 0;
+  });
+
+  // Handle sorting when a column header is clicked
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      // Toggle direction if clicking the same field
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new field and default to ascending
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Get sort indicator for column headers
+  const getSortIndicator = (field: SortField) => {
+    if (sortField !== field) return null;
+    return sortDirection === 'asc' ? '↑' : '↓';
   };
 
   // Handle user form submission
@@ -213,21 +253,24 @@ const AdminDashboard = () => {
                 <tr>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('email')}
                   >
-                    Email
+                    Email {getSortIndicator('email')}
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('created_at')}
                   >
-                    Date Created
+                    Date Created {getSortIndicator('created_at')}
                   </th>
                   <th
                     scope="col"
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('last_accessed')}
                   >
-                    Last Access
+                    Last Access {getSortIndicator('last_accessed')}
                   </th>
                   <th
                     scope="col"
@@ -238,7 +281,7 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => (
+                {sortedUsers.map((user) => (
                   <tr key={user.user_id}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.email}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
