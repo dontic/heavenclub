@@ -24,8 +24,8 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState<UserWithId[]>([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [sortField, setSortField] = useState<SortField>('email');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   /* --------------------------------- EFFECTS -------------------------------- */
   // Check authentication and authorization on component mount
