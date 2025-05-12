@@ -5,28 +5,26 @@ import type { MetaData } from '~/types';
 
 // Defaults
 const {
-  title = 'Heaven Club',
+  title = 'Heaven Kite Club',
   useTitleTemplate = false,
-  description = 'Heaven Club es el mejor club de kitesurf de la costa del sol. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
+  description = 'Heaven Kite Club. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
   canonical = Astro.url.href,
   index = true,
   follow = true,
   openGraph = {
     title: 'Heaven Club',
-    description:
-      'Heaven Club es el mejor club de kitesurf de la costa del sol. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
+    description: 'Heaven Kite Club. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
     type: 'website',
     image: '~/assets/images/og_image.png',
     url: canonical,
-    siteName: 'Heaven Club',
+    siteName: 'Heaven Kite Club',
     locale: 'es_ES',
   },
   twitter = {
     cardType: 'summary_large_image',
     site: '@heaven_kite_club',
-    title: 'Heaven Club',
-    description:
-      'Heaven Club es el mejor club de kitesurf de la costa del sol. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
+    title: 'Heaven Kite Club',
+    description: 'Heaven Kite Club. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
     image: '~/assets/images/og_image.png',
   },
 }: MetaData = Astro.props;
