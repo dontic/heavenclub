@@ -49,10 +49,9 @@ type NavigationConfig = {
 };
 
 export const SITE: SiteConfig = {
-  title: 'Heaven Club - El mejor club de kitesurf de la costa del sol',
-  description:
-    'Heaven Club es el mejor club de kitesurf de la costa del sol. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
-  author: 'Heaven Club',
+  title: 'Heaven Kite Club',
+  description: 'Heaven Kite Club. Conoce nuestros programas, nuestros cursos y nuestros eventos.',
+  author: 'Heaven Kite Club',
   siteUrl: 'https://heavenclub.es',
   ogImage: '/src/assets/images/og-image.webp', // Needs to be an absolute path /src/...
   locale: 'es_ES',
