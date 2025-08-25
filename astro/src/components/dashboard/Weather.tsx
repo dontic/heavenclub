@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import heavenMap from '~/assets/images/heaven-map.png';
 
 type LatestWeatherResponse = {
   ts: number;
@@ -6,6 +7,7 @@ type LatestWeatherResponse = {
   raw: {
     windspeedmph?: string;
     windgustmph?: string;
+    winddir?: string;
     dateutc?: string; // "YYYY-MM-DD HH:mm:ss" in UTC
   } & Record<string, string | undefined>;
 };
@@ -37,11 +39,35 @@ const getKnColorClass = (valueKn: number): string => {
   return 'text-red-600';
 };
 
+const degToCompass = (deg: number): string => {
+  const directions = [
+    'N',
+    'NNE',
+    'NE',
+    'ENE',
+    'E',
+    'ESE',
+    'SE',
+    'SSE',
+    'S',
+    'SSW',
+    'SW',
+    'WSW',
+    'W',
+    'WNW',
+    'NW',
+    'NNW',
+  ];
+  const idx = Math.round((deg % 360) / 22.5) % 16;
+  return directions[idx];
+};
+
 const Weather = () => {
   const [windspeedKn, setWindspeedKn] = useState<number | null>(null);
   const [windgustKn, setWindgustKn] = useState<number | null>(null);
   const [updatedAt, setUpdatedAt] = useState<string>('—');
   const [error, setError] = useState<string | null>(null);
+  const [windDirDeg, setWindDirDeg] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,11 +83,13 @@ const Weather = () => {
 
         const wsMph = parseFloat(json.raw?.windspeedmph || '0');
         const wgMph = parseFloat(json.raw?.windgustmph || '0');
+        const wdDegRaw = parseFloat(json.raw?.winddir || 'NaN');
         const wsKn = mphToKnots(wsMph);
         const wgKn = mphToKnots(wgMph);
         setWindspeedKn(wsKn);
         setWindgustKn(wgKn);
         setUpdatedAt(formatUpdatedAt(json.ts, json.raw?.dateutc));
+        setWindDirDeg(Number.isFinite(wdDegRaw) ? ((wdDegRaw % 360) + 360) % 360 : null);
       } catch (e: any) {
         if (cancelled) return;
         setError('No se pudo obtener el tiempo ahora mismo.');
@@ -106,6 +134,50 @@ const Weather = () => {
     <div className="w-full">
       <div className="text-sm text-gray-600 mb-3">Última actualización: {updatedAt}</div>
       {content}
+      <div className="mt-6">
+        <div className="text-sm text-gray-500 mb-2">Dirección del viento</div>
+        <div className="relative w-full rounded-lg border border-gray-200 overflow-hidden">
+          <img
+            src={heavenMap.src}
+            alt="Mapa del emplazamiento de la estación"
+            className="w-full h-auto object-contain"
+          />
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            {windDirDeg != null && (
+              <svg
+                width="88"
+                height="88"
+                viewBox="0 0 100 100"
+                xmlns="http://www.w3.org/2000/svg"
+                className="drop-shadow-lg"
+                style={{ transform: `rotate(${windDirDeg}deg)` }}
+                aria-label={`Dirección del viento ${windDirDeg.toFixed(0)}°`}
+              >
+                {/* Arrow pointing to 0° (N) by default; rotation applies meteorological bearing */}
+                <defs>
+                  <linearGradient id="arrowGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#1d4ed8" />
+                    <stop offset="100%" stopColor="#60a5fa" />
+                  </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="44" fill="rgba(255,255,255,0.65)" stroke="#cbd5e1" />
+                <polygon points="50,8 60,36 50,30 40,36" fill="url(#arrowGrad)" stroke="#1e3a8a" strokeWidth="1" />
+                <line x1="50" y1="30" x2="50" y2="78" stroke="#1e3a8a" strokeWidth="4" strokeLinecap="round" />
+                <circle cx="50" cy="50" r="5" fill="#1e3a8a" />
+              </svg>
+            )}
+          </div>
+          <div className="absolute bottom-2 left-2 rounded bg-white/80 text-gray-900 text-xs px-2 py-1">
+            {windDirDeg != null ? (
+              <span>
+                Dir: {windDirDeg.toFixed(0)}° ({degToCompass(windDirDeg)})
+              </span>
+            ) : (
+              <span>—</span>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
