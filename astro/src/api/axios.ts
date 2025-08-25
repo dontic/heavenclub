@@ -3,7 +3,7 @@
 import axios from 'axios';
 import type { AxiosRequestConfig } from 'axios';
 
-const baseURL = import.meta.env.PROD ? 'https://api.heavenclub.es' : 'http://10.11.12.21:8000';
+const baseURL = import.meta.env.PROD ? 'https://api.heavenclub.es' : 'http://localhost:8000';
 
 export const customAxios = axios.create({
   baseURL,
