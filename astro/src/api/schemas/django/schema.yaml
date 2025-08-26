@@ -6,10 +6,10 @@ info:
 paths:
   /api/contacts/:
     post:
-      operationId: contacts_create
+      operationId: api_contacts_create
       description: Create a new contact request
       tags:
-      - contacts
+      - api
       requestBody:
         content:
           application/json:
@@ -34,10 +34,10 @@ paths:
           description: ''
   /api/invitations/:
     get:
-      operationId: invitations_list
+      operationId: api_invitations_list
       description: List all users with their information
       tags:
-      - invitations
+      - api
       security:
       - cookieAuth: []
       responses:
@@ -50,10 +50,10 @@ paths:
                   $ref: '#/components/schemas/UserList'
           description: ''
     post:
-      operationId: invitations_create
+      operationId: api_invitations_create
       description: Create a new user
       tags:
-      - invitations
+      - api
       requestBody:
         content:
           application/json:
@@ -77,7 +77,7 @@ paths:
           description: ''
   /api/invitations/{email}/:
     delete:
-      operationId: invitations_destroy
+      operationId: api_invitations_destroy
       description: Delete user by email
       parameters:
       - in: path
@@ -87,12 +87,87 @@ paths:
           pattern: ^[^/]+$
         required: true
       tags:
-      - invitations
+      - api
       security:
       - cookieAuth: []
       responses:
         '204':
           description: No response body
+  /ecowitt/:
+    post:
+      operationId: ecowitt_create
+      description: Ingest Ecowitt observation payload via POST
+      tags:
+      - ecowitt
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EcowittObservationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EcowittObservationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EcowittObservationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EcowittObservation'
+          description: ''
+  /ecowitt/history:
+    get:
+      operationId: ecowitt_history_list
+      description: Get observations between two datetimes via GET
+      parameters:
+      - in: query
+        name: end
+        schema:
+          type: string
+          format: date-time
+        description: End datetime (inclusive)
+        required: true
+      - in: query
+        name: start
+        schema:
+          type: string
+          format: date-time
+        description: Start datetime (inclusive)
+        required: true
+      tags:
+      - ecowitt
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EcowittObservation'
+          description: ''
+  /ecowitt/realtime:
+    get:
+      operationId: ecowitt_realtime_retrieve
+      description: Get the latest Ecowitt observation via GET
+      tags:
+      - ecowitt
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EcowittObservation'
+          description: ''
 components:
   schemas:
     Contact:
@@ -138,6 +213,260 @@ components:
       - email
       - message
       - name
+    EcowittObservation:
+      type: object
+      properties:
+        stationtype:
+          type: string
+          maxLength: 64
+        runtime:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        heap:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        dateutc:
+          type: string
+          format: date-time
+        tempinf:
+          type: number
+          format: double
+        humidityin:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        baromrelin:
+          type: number
+          format: double
+        baromabsin:
+          type: number
+          format: double
+        tempf:
+          type: number
+          format: double
+        humidity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        winddir:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        windspeedmph:
+          type: number
+          format: double
+        windgustmph:
+          type: number
+          format: double
+        maxdailygust:
+          type: number
+          format: double
+        solarradiation:
+          type: number
+          format: double
+        uv:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        rainratein:
+          type: number
+          format: double
+        eventrainin:
+          type: number
+          format: double
+        hourlyrainin:
+          type: number
+          format: double
+        dailyrainin:
+          type: number
+          format: double
+        weeklyrainin:
+          type: number
+          format: double
+        monthlyrainin:
+          type: number
+          format: double
+        yearlyrainin:
+          type: number
+          format: double
+        totalrainin:
+          type: number
+          format: double
+        wh65batt:
+          type: string
+          maxLength: 16
+        freq:
+          type: string
+          maxLength: 16
+        model:
+          type: string
+          maxLength: 64
+        interval:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - baromabsin
+      - baromrelin
+      - dailyrainin
+      - dateutc
+      - eventrainin
+      - freq
+      - heap
+      - hourlyrainin
+      - humidity
+      - humidityin
+      - interval
+      - maxdailygust
+      - model
+      - monthlyrainin
+      - rainratein
+      - runtime
+      - solarradiation
+      - stationtype
+      - tempf
+      - tempinf
+      - totalrainin
+      - uv
+      - weeklyrainin
+      - wh65batt
+      - winddir
+      - windgustmph
+      - windspeedmph
+      - yearlyrainin
+    EcowittObservationRequest:
+      type: object
+      properties:
+        stationtype:
+          type: string
+          minLength: 1
+          maxLength: 64
+        runtime:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        heap:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        dateutc:
+          type: string
+          format: date-time
+        tempinf:
+          type: number
+          format: double
+        humidityin:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        baromrelin:
+          type: number
+          format: double
+        baromabsin:
+          type: number
+          format: double
+        tempf:
+          type: number
+          format: double
+        humidity:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        winddir:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        windspeedmph:
+          type: number
+          format: double
+        windgustmph:
+          type: number
+          format: double
+        maxdailygust:
+          type: number
+          format: double
+        solarradiation:
+          type: number
+          format: double
+        uv:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        rainratein:
+          type: number
+          format: double
+        eventrainin:
+          type: number
+          format: double
+        hourlyrainin:
+          type: number
+          format: double
+        dailyrainin:
+          type: number
+          format: double
+        weeklyrainin:
+          type: number
+          format: double
+        monthlyrainin:
+          type: number
+          format: double
+        yearlyrainin:
+          type: number
+          format: double
+        totalrainin:
+          type: number
+          format: double
+        wh65batt:
+          type: string
+          minLength: 1
+          maxLength: 16
+        freq:
+          type: string
+          minLength: 1
+          maxLength: 16
+        model:
+          type: string
+          minLength: 1
+          maxLength: 64
+        interval:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+      required:
+      - baromabsin
+      - baromrelin
+      - dailyrainin
+      - dateutc
+      - eventrainin
+      - freq
+      - heap
+      - hourlyrainin
+      - humidity
+      - humidityin
+      - interval
+      - maxdailygust
+      - model
+      - monthlyrainin
+      - rainratein
+      - runtime
+      - solarradiation
+      - stationtype
+      - tempf
+      - tempinf
+      - totalrainin
+      - uv
+      - weeklyrainin
+      - wh65batt
+      - winddir
+      - windgustmph
+      - windspeedmph
+      - yearlyrainin
     UserCreate:
       type: object
       description: Serializer for creating users (replacing invitation creation)

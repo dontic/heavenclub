@@ -88,6 +88,12 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
+        # Ecowitt logger
+        "ecowitt": {
+            "level": os.getenv("LOGGING_LOG_LEVEL", "DEBUG"),
+            "handlers": ["console"],
+            "propagate": False,
+        },
     },
 }
 logging.config.dictConfig(LOGGING)
@@ -190,6 +196,8 @@ INSTALLED_APPS = [
     "invitations",  # Custom invitations app
     # ------------------------------ CONTACTS ----------------------------------- #
     "contacts",  # Custom contacts app
+    # ------------------------------ ECOWITT ----------------------------------- #
+    "ecowitt",  # Ecowitt weather station ingest app
 ]
 
 # ---------------------------------------------------------------------------- #
