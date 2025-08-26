@@ -3,12 +3,13 @@ from datetime import datetime
 
 from django.utils.dateparse import parse_datetime
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema
 
 from .serializers import EcowittObservationSerializer
+from .models import EcowittObservation
 
 
 class EcowittIngestView(APIView):
@@ -55,3 +56,26 @@ class EcowittIngestView(APIView):
     )
     def post(self, request, *args, **kwargs):
         return self._ingest(request.data)
+
+
+class EcowittRealtimeView(APIView):
+    """
+    Returns the latest Ecowitt observation. Authentication required.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        responses={200: EcowittObservationSerializer},
+        description="Get the latest Ecowitt observation via GET",
+    )
+    def get(self, request, *args, **kwargs):
+        observation = EcowittObservation.objects.order_by(
+            "-dateutc", "-created_at"
+        ).first()
+        if not observation:
+            return Response(
+                {"detail": "No observations available"},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        return Response(EcowittObservationSerializer(observation).data)
