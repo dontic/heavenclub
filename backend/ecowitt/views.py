@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 
 from django.utils.dateparse import parse_datetime
+from django.http import QueryDict
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -26,7 +27,15 @@ class EcowittIngestView(APIView):
 
     def _ingest(self, payload: dict):
         expected_passkey = os.getenv("ECOWITT_STATION_PASSKEY")
-        received_passkey = payload.get("PASSKEY")
+        # DRF can give us a QueryDict for form-encoded submissions; flatten it
+        if isinstance(payload, QueryDict):
+            received_passkey = payload.get("PASSKEY")
+            data = payload.dict()
+        else:
+            received_passkey = payload.get("PASSKEY")
+            # If values are lists (e.g., from dict(QueryDict)), take the first item
+            data = {k: (v[0] if isinstance(v, list) else v) for k, v in payload.items()}
+        log.debug(f"Payload (flattened): {data}")
 
         if not expected_passkey:
             return Response(
@@ -40,7 +49,6 @@ class EcowittIngestView(APIView):
             )
 
         # Remove PASSKEY from validated data; it's not stored
-        data = dict(payload)
         data.pop("PASSKEY", None)
 
         serializer = EcowittObservationSerializer(data=data)
