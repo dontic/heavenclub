@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 from .serializers import EcowittObservationSerializer
 from .models import EcowittObservation
@@ -79,3 +79,66 @@ class EcowittRealtimeView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
         return Response(EcowittObservationSerializer(observation).data)
+
+
+class EcowittHistoryView(APIView):
+    """
+    Returns observations between two datetimes. Authentication required.
+    Query params:
+      - start: ISO8601 datetime
+      - end: ISO8601 datetime
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="start",
+                type=OpenApiTypes.DATETIME,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description="Start datetime (inclusive)",
+            ),
+            OpenApiParameter(
+                name="end",
+                type=OpenApiTypes.DATETIME,
+                location=OpenApiParameter.QUERY,
+                required=True,
+                description="End datetime (inclusive)",
+            ),
+        ],
+        responses={200: EcowittObservationSerializer(many=True)},
+        description="Get observations between two datetimes via GET",
+    )
+    def get(self, request, *args, **kwargs):
+        start_raw = request.query_params.get("start")
+        end_raw = request.query_params.get("end")
+
+        if not start_raw or not end_raw:
+            return Response(
+                {"detail": "Both 'start' and 'end' query parameters are required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        start_dt = parse_datetime(start_raw)
+        end_dt = parse_datetime(end_raw)
+
+        if start_dt is None or end_dt is None:
+            return Response(
+                {"detail": "Invalid datetime format for 'start' or 'end'"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if end_dt < start_dt:
+            return Response(
+                {"detail": "'end' must be greater than or equal to 'start'"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        queryset = EcowittObservation.objects.filter(
+            dateutc__gte=start_dt, dateutc__lte=end_dt
+        ).order_by("dateutc", "created_at")
+
+        serializer = EcowittObservationSerializer(queryset, many=True)
+        return Response(serializer.data)
