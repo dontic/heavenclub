@@ -190,6 +190,8 @@ INSTALLED_APPS = [
     "invitations",  # Custom invitations app
     # ------------------------------ CONTACTS ----------------------------------- #
     "contacts",  # Custom contacts app
+    # ------------------------------ ECOWITT ----------------------------------- #
+    "ecowitt",  # Ecowitt weather station ingest app
 ]
 
 # ---------------------------------------------------------------------------- #
