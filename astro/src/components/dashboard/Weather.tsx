@@ -1,32 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import heavenMap from '~/assets/images/heaven-map.png';
-
-type LatestWeatherResponse = {
-  ts: number;
-  age_s: number;
-  raw: {
-    windspeedmph?: string;
-    windgustmph?: string;
-    winddir?: string;
-    dateutc?: string; // "YYYY-MM-DD HH:mm:ss" in UTC
-  } & Record<string, string | undefined>;
-};
+import { ecowittRealtimeRetrieve } from '~/api/django/ecowitt/ecowitt';
 
 const mphToKnots = (mph: number): number => mph * 0.868976;
 
-const formatUpdatedAt = (ts?: number, dateutc?: string): string => {
+const formatUpdatedAt = (dateutc?: string): string => {
   try {
-    if (Number.isFinite(ts)) {
-      // API ts appears to be seconds since epoch (per example). Convert to ms.
-      const ms = (ts as number) * 1000;
-      const d = new Date(ms);
-      return d.toLocaleString();
-    }
-    if (dateutc) {
-      // Treat dateutc as UTC and render in local time
-      const d = new Date(dateutc.replace(' ', 'T') + 'Z');
-      return d.toLocaleString();
-    }
+    if (!dateutc) return '—';
+    const normalized = dateutc.includes('T') ? dateutc : dateutc.replace(' ', 'T') + 'Z';
+    const d = new Date(normalized);
+    if (Number.isNaN(d.getTime())) return '—';
+    return d.toLocaleString();
   } catch {}
   return '—';
 };
@@ -75,20 +59,18 @@ const Weather = () => {
     const fetchLatest = async () => {
       try {
         setError(null);
-        const resp = await fetch('https://weather.heavenclub.es/latest', { cache: 'no-store' });
-        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-        const json: LatestWeatherResponse = await resp.json();
+        const obs = await ecowittRealtimeRetrieve();
 
         if (cancelled) return;
 
-        const wsMph = parseFloat(json.raw?.windspeedmph || '0');
-        const wgMph = parseFloat(json.raw?.windgustmph || '0');
-        const wdDegRaw = parseFloat(json.raw?.winddir || 'NaN');
+        const wsMph = Number(obs?.windspeedmph ?? 0);
+        const wgMph = Number(obs?.windgustmph ?? 0);
+        const wdDegRaw = Number(obs?.winddir);
         const wsKn = mphToKnots(wsMph);
         const wgKn = mphToKnots(wgMph);
         setWindspeedKn(wsKn);
         setWindgustKn(wgKn);
-        setUpdatedAt(formatUpdatedAt(json.ts, json.raw?.dateutc));
+        setUpdatedAt(formatUpdatedAt(obs?.dateutc));
         setWindDirDeg(Number.isFinite(wdDegRaw) ? ((wdDegRaw % 360) + 360) % 360 : null);
       } catch (e: any) {
         if (cancelled) return;
