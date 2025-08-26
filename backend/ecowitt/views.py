@@ -11,6 +11,10 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from .serializers import EcowittObservationSerializer
 from .models import EcowittObservation
 
+import logging
+
+log = logging.getLogger(__name__)
+
 
 class EcowittIngestView(APIView):
     """
@@ -46,6 +50,8 @@ class EcowittIngestView(APIView):
                 EcowittObservationSerializer(observation).data,
                 status=status.HTTP_201_CREATED,
             )
+
+        log.error(f"Invalid payload: {serializer.errors}")
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

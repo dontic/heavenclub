@@ -88,6 +88,12 @@ LOGGING = {
             "handlers": ["console"],
             "propagate": False,
         },
+        # Ecowitt logger
+        "ecowitt": {
+            "level": os.getenv("LOGGING_LOG_LEVEL", "DEBUG"),
+            "handlers": ["console"],
+            "propagate": False,
+        },
     },
 }
 logging.config.dictConfig(LOGGING)
