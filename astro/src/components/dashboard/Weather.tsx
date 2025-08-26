@@ -150,10 +150,10 @@ const Weather = () => {
                 viewBox="0 0 100 100"
                 xmlns="http://www.w3.org/2000/svg"
                 className="drop-shadow-lg"
-                style={{ transform: `rotate(${windDirDeg}deg)` }}
+                style={{ transform: `rotate(${(windDirDeg + 180) % 360}deg)` }}
                 aria-label={`Dirección del viento ${windDirDeg.toFixed(0)}°`}
               >
-                {/* Arrow pointing to 0° (N) by default; rotation applies meteorological bearing */}
+                {/* Arrow points toward where wind is going; meteorological bearing (from) + 180° */}
                 <defs>
                   <linearGradient id="arrowGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#1d4ed8" />
