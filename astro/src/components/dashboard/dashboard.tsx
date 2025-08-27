@@ -4,11 +4,13 @@ import Weather from './Weather';
 import LoadingSpinner from '../common/LoadingSpinner';
 import LogoutButton from '../authentication/LogoutButton';
 import { getAllauthClientV1AuthSession } from '~/api/allauth/authentication-current-session/authentication-current-session';
+import hlsOverlayUrl from '~/assets/images/hls-overlay.png?url';
 
 const Dashboard = () => {
   /* --------------------------------- STATES --------------------------------- */
   const [isLoading, setIsLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | undefined>(undefined);
+  const [playStream, setPlayStream] = useState(false);
 
   /* --------------------------------- EFFECTS -------------------------------- */
   // Check authentication on component mount
@@ -64,11 +66,37 @@ const Dashboard = () => {
 
         <div className="w-full max-w-3xl mb-8">
           <h2 className="text-xl font-semibold mb-4">Heaven Cam en vivo</h2>
-          <HLSPlayer
-            streamUrl="https://cam.heavenclub.es/heaven_cam/index.m3u8"
-            className="w-full aspect-video"
-            title="Heaven Cam en vivo"
-          />
+          {playStream ? (
+            <HLSPlayer
+              streamUrl="https://cam.heavenclub.es/heaven_cam/index.m3u8"
+              className="w-full aspect-video"
+              title="Heaven Cam en vivo"
+            />
+          ) : (
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden bg-black">
+              <img
+                src={hlsOverlayUrl}
+                alt="Heaven Cam overlay"
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="lazy"
+              />
+              <button
+                type="button"
+                aria-label="Reproducir Heaven Cam"
+                onClick={() => setPlayStream(true)}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-16 w-16 rounded-full bg-white/80 hover:bg-white text-black flex items-center justify-center shadow-lg transition cursor-pointer"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-8 w-8 ml-1"
+                >
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="w-full max-w-3xl mb-8">
