@@ -52,6 +52,8 @@ const Weather = () => {
   const [updatedAt, setUpdatedAt] = useState<string>('—');
   const [error, setError] = useState<string | null>(null);
   const [windDirDeg, setWindDirDeg] = useState<number | null>(null);
+  const [tempC, setTempC] = useState<number | null>(null);
+  const [humidityPct, setHumidityPct] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,12 +68,16 @@ const Weather = () => {
         const wsMph = Number(obs?.windspeedmph ?? 0);
         const wgMph = Number(obs?.windgustmph ?? 0);
         const wdDegRaw = Number(obs?.winddir);
+        const tempF = Number(obs?.tempf);
+        const humidity = Number(obs?.humidity);
         const wsKn = mphToKnots(wsMph);
         const wgKn = mphToKnots(wgMph);
         setWindspeedKn(wsKn);
         setWindgustKn(wgKn);
         setUpdatedAt(formatUpdatedAt(obs?.dateutc));
         setWindDirDeg(Number.isFinite(wdDegRaw) ? ((wdDegRaw % 360) + 360) % 360 : null);
+        setTempC(Number.isFinite(tempF) ? (tempF - 32) * (5 / 9) : null);
+        setHumidityPct(Number.isFinite(humidity) ? humidity : null);
       } catch (e: any) {
         if (cancelled) return;
         setError('No se pudo obtener el tiempo ahora mismo.');
@@ -157,6 +163,23 @@ const Weather = () => {
             ) : (
               <span>—</span>
             )}
+          </div>
+        </div>
+      </div>
+      <div className="mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 p-4">
+            <div className="text-sm text-gray-500 mb-1">Temperatura</div>
+            <div className="font-semibold text-4xl text-gray-800">
+              {tempC != null ? tempC.toFixed(1) : '—'} <span className="text-base font-normal text-gray-500">°C</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 p-4">
+            <div className="text-sm text-gray-500 mb-1">Humedad</div>
+            <div className="font-semibold text-4xl text-gray-800">
+              {humidityPct != null ? humidityPct.toFixed(0) : '—'}{' '}
+              <span className="text-base font-normal text-gray-500">%</span>
+            </div>
           </div>
         </div>
       </div>
