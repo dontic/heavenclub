@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 from .serializers import EcowittObservationSerializer
+from .permissions import IsAuthenticatedOrHasServiceToken
 from .models import EcowittObservation
 
 import logging
@@ -77,11 +78,30 @@ class EcowittRealtimeView(APIView):
     Returns the latest Ecowitt observation. Authentication required.
     """
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrHasServiceToken]
 
     @extend_schema(
         responses={200: EcowittObservationSerializer},
         description="Get the latest Ecowitt observation via GET",
+        parameters=[
+            OpenApiParameter(
+                name="Authorization",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.HEADER,
+                required=False,
+                description=(
+                    "Optional service token. Use 'Bearer <token>' or 'Token <token>'. "
+                    "Alternatively provide 'X-API-Key' header."
+                ),
+            ),
+            OpenApiParameter(
+                name="X-API-Key",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.HEADER,
+                required=False,
+                description="Optional service token for inter-service access.",
+            ),
+        ],
     )
     def get(self, request, *args, **kwargs):
         observation = EcowittObservation.objects.order_by(
