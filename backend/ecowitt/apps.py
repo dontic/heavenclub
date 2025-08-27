@@ -10,31 +10,8 @@ class EcowittConfig(AppConfig):
     name = "ecowitt"
 
     def ready(self):
-        # Auto-create a daily beat schedule for the purge task if not present
+        # Import signal handlers (safe; no DB access at import time)
         try:
-            from django_celery_beat.models import PeriodicTask, CrontabSchedule
-            from django.db.utils import OperationalError, ProgrammingError
-            from django.conf import settings
-
-            # Avoid during initial migrate when tables may not exist
-            try:
-                schedule, _ = CrontabSchedule.objects.get_or_create(
-                    minute="0",
-                    hour="3",
-                    day_of_week="*",
-                    day_of_month="*",
-                    month_of_year="*",
-                )
-            except (OperationalError, ProgrammingError):
-                return
-
-            task_name = "ecowitt.tasks.purge_old_observations"
-            PeriodicTask.objects.get_or_create(
-                crontab=schedule,
-                name="Purge old Ecowitt observations daily",
-                task=task_name,
-                defaults={"enabled": True},
-            )
+            import ecowitt.signals  # noqa: F401
         except Exception as exc:  # pragma: no cover - defensive
-            # Do not crash app startup for scheduling errors
-            log.warning("Failed to ensure purge task schedule: %s", exc)
+            log.warning("Failed to load ecowitt signal handlers: %s", exc)
