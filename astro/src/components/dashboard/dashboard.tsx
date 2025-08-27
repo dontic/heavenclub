@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import HLSPlayer from './HLSPlayer';
 import Weather from './Weather';
+import WindGuru from './WindGuru';
 import LoadingSpinner from '../common/LoadingSpinner';
 import LogoutButton from '../authentication/LogoutButton';
 import { getAllauthClientV1AuthSession } from '~/api/allauth/authentication-current-session/authentication-current-session';
@@ -102,6 +103,11 @@ const Dashboard = () => {
         <div className="w-full max-w-3xl mb-8">
           <h2 className="text-xl font-semibold mb-4">El tiempo en Heaven</h2>
           <Weather />
+        </div>
+
+        <div className="w-full max-w-6xl mb-8">
+          <h2 className="text-xl font-semibold mb-4">La previ del Heaven</h2>
+          <WindGuru className="w-full" />
         </div>
 
         <LogoutButton />
