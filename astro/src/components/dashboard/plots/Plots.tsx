@@ -21,6 +21,86 @@ const getMadridDateString = (d: Date): string => {
   return fmt.format(d);
 };
 
+// Convert a timestamp to an ISO-like string in Europe/Madrid timezone (YYYY-MM-DDTHH:mm:ss)
+const toMadridLocalIso = (input: string): string => {
+  try {
+    if (!input) return '';
+    let normalized = input.trim();
+    if (!normalized.includes('T') && normalized.includes(' ')) {
+      normalized = normalized.replace(' ', 'T');
+    }
+    // If there is no timezone information, assume UTC
+    const hasTz = /Z|[\+\-]\d{2}:?\d{2}$/.test(normalized);
+    if (!hasTz) {
+      normalized = normalized + 'Z';
+    }
+    const d = new Date(normalized);
+    if (Number.isNaN(d.getTime())) return '';
+
+    const datePart = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Madrid',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(d);
+    const timePart = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Madrid',
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    }).format(d);
+    return `${datePart}T${timePart}`;
+  } catch {
+    return '';
+  }
+};
+
+// Compute numeric timezone offset (in minutes) for a given UTC instant in a target IANA zone
+const getTimeZoneOffsetMinutes = (utcDate: Date, timeZone: string): number => {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  }).formatToParts(utcDate);
+
+  let y = 0,
+    m = 0,
+    d = 0,
+    hh = 0,
+    mm = 0,
+    ss = 0;
+  for (const p of parts) {
+    if (p.type === 'year') y = Number(p.value);
+    if (p.type === 'month') m = Number(p.value);
+    if (p.type === 'day') d = Number(p.value);
+    if (p.type === 'hour') hh = Number(p.value);
+    if (p.type === 'minute') mm = Number(p.value);
+    if (p.type === 'second') ss = Number(p.value);
+  }
+  const asUtcMs = Date.UTC(y, m - 1, d, hh, mm, ss);
+  const diffMinutes = Math.round((asUtcMs - utcDate.getTime()) / 60000);
+  return diffMinutes;
+};
+
+// For a YYYY-MM-DD (Madrid) date string, compute [startZ, endZ] ISO strings covering 00:00–23:59 Madrid
+const getMadridDayBoundsIsoZ = (ymd: string): [string, string] => {
+  const [yy, mo, dd] = ymd.split('-').map((v) => Number(v));
+  // Use noon UTC to determine offset for that day in Madrid (stable within the day)
+  const noonUtc = new Date(Date.UTC(yy, (mo || 1) - 1, dd || 1, 12, 0, 0));
+  const offsetMin = getTimeZoneOffsetMinutes(noonUtc, 'Europe/Madrid');
+  const startLocalMs = Date.UTC(yy, (mo || 1) - 1, dd || 1, 0, 0, 0);
+  const endLocalMs = Date.UTC(yy, (mo || 1) - 1, dd || 1, 23, 59, 59);
+  const startUtcMs = startLocalMs - offsetMin * 60000;
+  const endUtcMs = endLocalMs - offsetMin * 60000;
+  return [new Date(startUtcMs).toISOString(), new Date(endUtcMs).toISOString()];
+};
+
 const Plots = () => {
   const [date, setDate] = useState<string>(() => getMadridDateString(new Date()));
   const [data, setData] = useState<FiveMin[] | null>(null);
@@ -70,8 +150,9 @@ const Plots = () => {
     };
   }, [date]);
 
-  const { x, speedKn, gustKn, dirDeg, avgSpeedKn } = useMemo(() => {
+  const { x, xTextMadrid, speedKn, gustKn, dirDeg, avgSpeedKn } = useMemo(() => {
     const xVals: string[] = [];
+    const xText: string[] = [];
     const sKn: number[] = [];
     const gKn: number[] = [];
     const dDeg: number[] = [];
@@ -80,7 +161,18 @@ const Plots = () => {
       for (const r of data) {
         const t = r.bucket_start ?? '';
         if (!t) continue;
-        xVals.push(t);
+        // Normalize raw timestamp to ISO UTC for plotting
+        let normalized = t.trim();
+        if (!normalized.includes('T') && normalized.includes(' ')) {
+          normalized = normalized.replace(' ', 'T');
+        }
+        if (!/Z|[\+\-]\d{2}:?\d{2}$/.test(normalized)) {
+          normalized = normalized + 'Z';
+        }
+        const dObj = new Date(normalized);
+        if (Number.isNaN(dObj.getTime())) continue;
+        xVals.push(dObj.toISOString());
+        xText.push(toMadridLocalIso(normalized).replace('T', ' '));
         sKn.push(mphToKnots(Number(r.windspeedmph_avg ?? 0)));
         gKn.push(mphToKnots(Number(r.windgustmph_max ?? 0)));
         dDeg.push(Number(r.winddir_avg ?? NaN));
@@ -90,10 +182,11 @@ const Plots = () => {
     const validSpeeds = sKn.filter((v) => Number.isFinite(v));
     const avg = validSpeeds.length ? validSpeeds.reduce((a, b) => a + b, 0) / validSpeeds.length : 0;
 
-    return { x: xVals, speedKn: sKn, gustKn: gKn, dirDeg: dDeg, avgSpeedKn: avg };
+    return { x: xVals, xTextMadrid: xText, speedKn: sKn, gustKn: gKn, dirDeg: dDeg, avgSpeedKn: avg };
   }, [data]);
 
   const hasData = x.length > 0;
+  const [rangeStartIsoZ, rangeEndIsoZ] = useMemo(() => getMadridDayBoundsIsoZ(date), [date]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -126,7 +219,8 @@ const Plots = () => {
                     name: 'Wind Gust',
                     fill: 'tozeroy',
                     line: { color: '#3b82f6', width: 1.5 },
-                    hovertemplate: '%{y:.1f} kn gust<extra></extra>',
+                    text: xTextMadrid,
+                    hovertemplate: '%{text}<br>%{y:.1f} kn gust<extra></extra>',
                   } as any,
                   {
                     x,
@@ -135,7 +229,8 @@ const Plots = () => {
                     mode: 'lines',
                     name: 'Wind Speed',
                     line: { color: '#eab308', width: 2 },
-                    hovertemplate: '%{y:.1f} kn speed<extra></extra>',
+                    text: xTextMadrid,
+                    hovertemplate: '%{text}<br>%{y:.1f} kn speed<extra></extra>',
                   } as any,
                 ]}
                 layout={{
@@ -147,6 +242,7 @@ const Plots = () => {
                   xaxis: {
                     type: 'date',
                     title: '',
+                    range: [rangeStartIsoZ, rangeEndIsoZ],
                   },
                   yaxis: {
                     title: 'kn',
@@ -188,7 +284,8 @@ const Plots = () => {
                     mode: 'markers',
                     name: 'Wind Direction',
                     marker: { color: '#f59e0b', size: 6, opacity: 0.9 },
-                    hovertemplate: '%{y:.0f}°<extra></extra>',
+                    text: xTextMadrid,
+                    hovertemplate: '%{text}<br>%{y:.0f}°<extra></extra>',
                   } as any,
                 ]}
                 layout={{
@@ -197,7 +294,7 @@ const Plots = () => {
                   margin: { l: 40, r: 20, t: 10, b: 40 },
                   paper_bgcolor: 'rgba(0,0,0,0)',
                   plot_bgcolor: 'rgba(0,0,0,0)',
-                  xaxis: { type: 'date', title: '' },
+                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ] },
                   yaxis: {
                     title: '°',
                     range: [0, 360],
