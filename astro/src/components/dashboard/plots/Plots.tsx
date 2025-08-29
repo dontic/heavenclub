@@ -53,6 +53,7 @@ const Plots = () => {
         setLoading(true);
         setError(null);
         const rows = await ecowittHistoryList({ date });
+        console.debug('rows', rows);
         if (cancelled) return;
         setData(rows as FiveMin[]);
       } catch (e: any) {
