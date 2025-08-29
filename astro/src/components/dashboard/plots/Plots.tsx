@@ -88,17 +88,12 @@ const getTimeZoneOffsetMinutes = (utcDate: Date, timeZone: string): number => {
   return diffMinutes;
 };
 
-// For a YYYY-MM-DD (Madrid) date string, compute [startZ, endZ] ISO strings covering 00:00–23:59 Madrid
+// For a YYYY-MM-DD (Madrid) date string, return [startZ, endZ] representing
+// 00:00–23:59 of that date in Madrid, encoded as if UTC (so axis labels show Madrid clock time)
 const getMadridDayBoundsIsoZ = (ymd: string): [string, string] => {
-  const [yy, mo, dd] = ymd.split('-').map((v) => Number(v));
-  // Use noon UTC to determine offset for that day in Madrid (stable within the day)
-  const noonUtc = new Date(Date.UTC(yy, (mo || 1) - 1, dd || 1, 12, 0, 0));
-  const offsetMin = getTimeZoneOffsetMinutes(noonUtc, 'Europe/Madrid');
-  const startLocalMs = Date.UTC(yy, (mo || 1) - 1, dd || 1, 0, 0, 0);
-  const endLocalMs = Date.UTC(yy, (mo || 1) - 1, dd || 1, 23, 59, 59);
-  const startUtcMs = startLocalMs - offsetMin * 60000;
-  const endUtcMs = endLocalMs - offsetMin * 60000;
-  return [new Date(startUtcMs).toISOString(), new Date(endUtcMs).toISOString()];
+  const start = `${ymd}T00:00:00Z`;
+  const end = `${ymd}T23:59:59Z`;
+  return [start, end];
 };
 
 const Plots = () => {
@@ -161,7 +156,7 @@ const Plots = () => {
       for (const r of data) {
         const t = r.bucket_start ?? '';
         if (!t) continue;
-        // Normalize raw timestamp to ISO UTC for plotting
+        // Normalize raw timestamp; build Madrid-local wall time for axis labels (as-if UTC)
         let normalized = t.trim();
         if (!normalized.includes('T') && normalized.includes(' ')) {
           normalized = normalized.replace(' ', 'T');
@@ -171,8 +166,11 @@ const Plots = () => {
         }
         const dObj = new Date(normalized);
         if (Number.isNaN(dObj.getTime())) continue;
-        xVals.push(dObj.toISOString());
-        xText.push(toMadridLocalIso(normalized).replace('T', ' '));
+        const madridLocalIso = toMadridLocalIso(normalized);
+        if (!madridLocalIso) continue;
+        // Use Madrid-local time but append Z, so Plotly renders the label as Madrid clock time
+        xVals.push(`${madridLocalIso}Z`);
+        xText.push(madridLocalIso.replace('T', ' '));
         sKn.push(mphToKnots(Number(r.windspeedmph_avg ?? 0)));
         gKn.push(mphToKnots(Number(r.windgustmph_max ?? 0)));
         dDeg.push(Number(r.winddir_avg ?? NaN));
