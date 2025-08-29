@@ -11,8 +11,26 @@ from .models import EcowittObservation, EcowittObservation5Min
 log = logging.getLogger(__name__)
 
 
-def _get_retention_days() -> int:
-    raw_value = os.getenv("ECOWITT_RETENTION_DAYS", "")
+def _get_observation_retention_days() -> int:
+    raw_value = os.getenv("ECOWITT_OBSERVATION_RETENTION_DAYS", "")
+    if not raw_value:
+        # Default to 7 days if not provided
+        return 7
+    try:
+        value = int(raw_value)
+        # Guard against negative or zero values
+        return max(value, 1)
+    except ValueError:
+        # Fallback to sane default and warn
+        log.warning(
+            "Invalid ECOWITT_OBSERVATION_RETENTION_DAYS='%s'. Falling back to 7.",
+            raw_value,
+        )
+        return 7
+
+
+def _get_aggregate_retention_days() -> int:
+    raw_value = os.getenv("ECOWITT_AGGREGATE_RETENTION_DAYS", "")
     if not raw_value:
         # Default to 30 days if not provided
         return 30
@@ -23,7 +41,8 @@ def _get_retention_days() -> int:
     except ValueError:
         # Fallback to sane default and warn
         log.warning(
-            "Invalid ECOWITT_RETENTION_DAYS='%s'. Falling back to 30.", raw_value
+            "Invalid ECOWITT_AGGREGATE_RETENTION_DAYS='%s'. Falling back to 30.",
+            raw_value,
         )
         return 30
 
@@ -31,31 +50,56 @@ def _get_retention_days() -> int:
 @shared_task
 def purge_old_observations() -> int:
     """
-    Delete Ecowitt observations older than ECOWITT_RETENTION_DAYS.
+    Delete raw observations and aggregated 5-minute buckets based on retention envs.
 
     Returns the number of deleted rows.
     """
-    retention_days = _get_retention_days()
-    threshold = timezone.now() - timedelta(days=retention_days)
+    obs_retention_days = _get_observation_retention_days()
+    agg_retention_days = _get_aggregate_retention_days()
 
-    # Use dateutc as the primary temporal field; fall back to created_at if needed
-    deleted_count, _ = EcowittObservation.objects.filter(dateutc__lt=threshold).delete()
+    now = timezone.now()
 
-    if deleted_count == 0:
+    # Purge raw observations
+    obs_threshold = now - timedelta(days=obs_retention_days)
+    obs_deleted_count, _ = EcowittObservation.objects.filter(
+        dateutc__lt=obs_threshold
+    ).delete()
+
+    if obs_deleted_count == 0:
         # As a safety net, also attempt via created_at for any edge cases
-        alt_deleted_count, _ = EcowittObservation.objects.filter(
-            created_at__lt=threshold
+        obs_alt_deleted_count, _ = EcowittObservation.objects.filter(
+            created_at__lt=obs_threshold
         ).delete()
-        deleted_count += alt_deleted_count
+        obs_deleted_count += obs_alt_deleted_count
 
     log.info(
-        "Purged %s Ecowitt observations older than %s days (threshold=%s)",
-        deleted_count,
-        retention_days,
-        threshold.isoformat(),
+        "Purged %s Ecowitt raw observations older than %s days (threshold=%s)",
+        obs_deleted_count,
+        obs_retention_days,
+        obs_threshold.isoformat(),
     )
 
-    return deleted_count
+    # Purge aggregated 5-minute buckets
+    agg_threshold = now - timedelta(days=agg_retention_days)
+    agg_deleted_count, _ = EcowittObservation5Min.objects.filter(
+        bucket_start__lt=agg_threshold
+    ).delete()
+
+    if agg_deleted_count == 0:
+        # Safety net via created_at as well
+        agg_alt_deleted_count, _ = EcowittObservation5Min.objects.filter(
+            created_at__lt=agg_threshold
+        ).delete()
+        agg_deleted_count += agg_alt_deleted_count
+
+    log.info(
+        "Purged %s Ecowitt 5-minute aggregates older than %s days (threshold=%s)",
+        agg_deleted_count,
+        agg_retention_days,
+        agg_threshold.isoformat(),
+    )
+
+    return obs_deleted_count + agg_deleted_count
 
 
 def _floor_to_5_minutes(dt):
