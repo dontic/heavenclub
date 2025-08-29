@@ -124,21 +124,16 @@ paths:
   /ecowitt/history:
     get:
       operationId: ecowitt_history_list
-      description: Get observations between two datetimes via GET
+      description: Get aggregated 5-minute observations for a given date in Madrid
+        timezone
       parameters:
       - in: query
-        name: end
+        name: date
         schema:
           type: string
-          format: date-time
-        description: End datetime (inclusive)
-        required: true
-      - in: query
-        name: start
-        schema:
-          type: string
-          format: date-time
-        description: Start datetime (inclusive)
+          format: date
+        description: Date in format YYYY-MM-DD. Interpreted in Europe/Madrid; returns
+          5-minute aggregates from 00:00 to 23:59 for that local day.
         required: true
       tags:
       - ecowitt
@@ -151,12 +146,24 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/EcowittObservation'
+                  $ref: '#/components/schemas/EcowittObservation5Min'
           description: ''
   /ecowitt/realtime:
     get:
       operationId: ecowitt_realtime_retrieve
       description: Get the latest Ecowitt observation via GET
+      parameters:
+      - in: header
+        name: Authorization
+        schema:
+          type: string
+        description: Optional service token. Use 'Bearer <token>' or 'Token <token>'.
+          Alternatively provide 'X-API-Key' header.
+      - in: header
+        name: X-API-Key
+        schema:
+          type: string
+        description: Optional service token for inter-service access.
       tags:
       - ecowitt
       security:
@@ -338,6 +345,98 @@ components:
       - windgustmph
       - windspeedmph
       - yearlyrainin
+    EcowittObservation5Min:
+      type: object
+      properties:
+        bucket_start:
+          type: string
+          format: date-time
+        sample_count:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        tempinf_avg:
+          type: number
+          format: double
+        humidityin_avg:
+          type: number
+          format: double
+        baromrelin_avg:
+          type: number
+          format: double
+        baromabsin_avg:
+          type: number
+          format: double
+        tempf_avg:
+          type: number
+          format: double
+        humidity_avg:
+          type: number
+          format: double
+        winddir_avg:
+          type: number
+          format: double
+        windspeedmph_avg:
+          type: number
+          format: double
+        windgustmph_max:
+          type: number
+          format: double
+        maxdailygust_max:
+          type: number
+          format: double
+        solarradiation_avg:
+          type: number
+          format: double
+        uv_avg:
+          type: number
+          format: double
+        rainratein_avg:
+          type: number
+          format: double
+        eventrainin_last:
+          type: number
+          format: double
+        hourlyrainin_last:
+          type: number
+          format: double
+        dailyrainin_last:
+          type: number
+          format: double
+        weeklyrainin_last:
+          type: number
+          format: double
+        monthlyrainin_last:
+          type: number
+          format: double
+        yearlyrainin_last:
+          type: number
+          format: double
+        totalrainin_last:
+          type: number
+          format: double
+      required:
+      - baromabsin_avg
+      - baromrelin_avg
+      - bucket_start
+      - dailyrainin_last
+      - eventrainin_last
+      - hourlyrainin_last
+      - humidity_avg
+      - humidityin_avg
+      - maxdailygust_max
+      - monthlyrainin_last
+      - rainratein_avg
+      - solarradiation_avg
+      - tempf_avg
+      - tempinf_avg
+      - totalrainin_last
+      - uv_avg
+      - weeklyrainin_last
+      - winddir_avg
+      - windgustmph_max
+      - windspeedmph_avg
+      - yearlyrainin_last
     EcowittObservationRequest:
       type: object
       properties:

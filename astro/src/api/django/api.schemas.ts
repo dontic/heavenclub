@@ -95,6 +95,35 @@ export interface EcowittObservation {
   interval: number;
 }
 
+export interface EcowittObservation5Min {
+  bucket_start: string;
+  /**
+   * @minimum -2147483648
+   * @maximum 2147483647
+   */
+  sample_count?: number;
+  tempinf_avg: number;
+  humidityin_avg: number;
+  baromrelin_avg: number;
+  baromabsin_avg: number;
+  tempf_avg: number;
+  humidity_avg: number;
+  winddir_avg: number;
+  windspeedmph_avg: number;
+  windgustmph_max: number;
+  maxdailygust_max: number;
+  solarradiation_avg: number;
+  uv_avg: number;
+  rainratein_avg: number;
+  eventrainin_last: number;
+  hourlyrainin_last: number;
+  dailyrainin_last: number;
+  weeklyrainin_last: number;
+  monthlyrainin_last: number;
+  yearlyrainin_last: number;
+  totalrainin_last: number;
+}
+
 export interface EcowittObservationRequest {
   /**
    * @minLength 1
@@ -199,11 +228,7 @@ export interface UserList {
 
 export type EcowittHistoryListParams = {
   /**
-   * End datetime (inclusive)
+   * Date in format YYYY-MM-DD. Interpreted in Europe/Madrid; returns 5-minute aggregates from 00:00 to 23:59 for that local day.
    */
-  end: string;
-  /**
-   * Start datetime (inclusive)
-   */
-  start: string;
+  date: string;
 };
