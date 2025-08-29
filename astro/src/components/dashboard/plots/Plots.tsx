@@ -375,6 +375,138 @@ const Plots = () => {
         <div className="text-sm text-gray-500">No hay datos para esta fecha</div>
       ) : (
         <>
+          {/* Wind speed + gusts */}
+          <div className="w-full">
+            <div className="text-sm text-gray-500 mb-2">Velocidad del viento</div>
+            {PlotComponent ? (
+              <PlotComponent
+                data={[
+                  {
+                    x,
+                    y: gustKn,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Racha',
+                    fill: 'tozeroy',
+                    line: { color: '#3b82f6', width: 1.5 },
+                    text: xTextMadrid,
+                    hovertemplate: '%{text}<br>%{y:.1f} kn gust<extra></extra>',
+                  } as any,
+                  {
+                    x,
+                    y: speedKn,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Viento',
+                    line: { color: '#eab308', width: 2 },
+                    text: xTextMadrid,
+                    hovertemplate: '%{text}<br>%{y:.1f} kn speed<extra></extra>',
+                  } as any,
+                  {
+                    x: combinedMaxMarker.x,
+                    y: combinedMaxMarker.y,
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    name: 'Máximo',
+                    marker: { color: '#f97316', size: 8 },
+                    text: combinedMaxMarker.y.map((v: number) => v.toFixed(1)),
+                    textposition: 'top center',
+                    hovertemplate: '%{text} kn<extra>Máximo</extra>',
+                    showlegend: false,
+                  } as any,
+                  {
+                    x: combinedMinMarker.x,
+                    y: combinedMinMarker.y,
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    name: 'Mínimo',
+                    marker: { color: '#60a5fa', size: 8 },
+                    text: combinedMinMarker.y.map((v: number) => v.toFixed(1)),
+                    textposition: 'bottom center',
+                    hovertemplate: '%{text} kn<extra>Mínimo</extra>',
+                    showlegend: false,
+                  } as any,
+                ]}
+                layout={{
+                  autosize: true,
+                  height: 320,
+                  margin: { l: 40, r: 20, t: 10, b: 40 },
+                  paper_bgcolor: 'rgba(0,0,0,0)',
+                  plot_bgcolor: 'rgba(0,0,0,0)',
+                  xaxis: {
+                    type: 'date',
+                    title: '',
+                    range: [rangeStartIsoZ, rangeEndIsoZ],
+                  },
+                  yaxis: {
+                    title: 'kn',
+                    rangemode: 'tozero',
+                    gridcolor: '#1f2937',
+                    zerolinecolor: '#1f2937',
+                  },
+                  showlegend: true,
+                  legend: { orientation: 'h', x: 1, xanchor: 'right', y: 1.1 },
+                  shapes: [
+                    {
+                      type: 'line',
+                      xref: 'paper',
+                      x0: 0,
+                      x1: 1,
+                      y0: avgSpeedKn,
+                      y1: avgSpeedKn,
+                      line: { color: '#94a3b8', dash: 'dash', width: 1 },
+                    },
+                  ],
+                }}
+                config={{ responsive: true, displayModeBar: false }}
+                style={{ width: '100%' }}
+              />
+            ) : (
+              <div className="text-sm text-gray-500">Cargando gráfico…</div>
+            )}
+          </div>
+
+          {/* Wind direction */}
+          <div className="w-full">
+            <div className="text-sm text-gray-500 mb-2">Dirección del viento</div>
+            {PlotComponent ? (
+              <PlotComponent
+                data={[
+                  {
+                    x,
+                    y: dirDeg,
+                    type: 'scatter',
+                    mode: 'markers',
+                    name: 'Wind Direction',
+                    marker: { color: '#f59e0b', size: 6, opacity: 0.9 },
+                    text: xTextMadrid,
+                    hovertemplate: '%{text}<br>%{y:.0f}°<extra></extra>',
+                  } as any,
+                ]}
+                layout={{
+                  autosize: true,
+                  height: 260,
+                  margin: { l: 40, r: 20, t: 10, b: 40 },
+                  paper_bgcolor: 'rgba(0,0,0,0)',
+                  plot_bgcolor: 'rgba(0,0,0,0)',
+                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ] },
+                  yaxis: {
+                    title: '°',
+                    range: [0, 360],
+                    tickvals: [0, 90, 180, 270, 360],
+                    ticktext: ['N', 'E', 'S', 'W', 'N'],
+                    gridcolor: '#1f2937',
+                    zerolinecolor: '#1f2937',
+                  },
+                  showlegend: false,
+                }}
+                config={{ responsive: true, displayModeBar: false }}
+                style={{ width: '100%' }}
+              />
+            ) : (
+              <div className="text-sm text-gray-500">Cargando gráfico…</div>
+            )}
+          </div>
           {/* Temperature */}
           <div className="w-full">
             <div className="text-sm text-gray-500 mb-2">Temperatura</div>
@@ -515,139 +647,6 @@ const Plots = () => {
                       line: { color: '#94a3b8', dash: 'dash', width: 1 },
                     },
                   ],
-                }}
-                config={{ responsive: true, displayModeBar: false }}
-                style={{ width: '100%' }}
-              />
-            ) : (
-              <div className="text-sm text-gray-500">Cargando gráfico…</div>
-            )}
-          </div>
-
-          {/* Wind speed + gusts */}
-          <div className="w-full">
-            <div className="text-sm text-gray-500 mb-2">Velocidad del viento</div>
-            {PlotComponent ? (
-              <PlotComponent
-                data={[
-                  {
-                    x,
-                    y: gustKn,
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'Racha',
-                    fill: 'tozeroy',
-                    line: { color: '#3b82f6', width: 1.5 },
-                    text: xTextMadrid,
-                    hovertemplate: '%{text}<br>%{y:.1f} kn gust<extra></extra>',
-                  } as any,
-                  {
-                    x,
-                    y: speedKn,
-                    type: 'scatter',
-                    mode: 'lines',
-                    name: 'Viento',
-                    line: { color: '#eab308', width: 2 },
-                    text: xTextMadrid,
-                    hovertemplate: '%{text}<br>%{y:.1f} kn speed<extra></extra>',
-                  } as any,
-                  {
-                    x: combinedMaxMarker.x,
-                    y: combinedMaxMarker.y,
-                    type: 'scatter',
-                    mode: 'markers+text',
-                    name: 'Máximo',
-                    marker: { color: '#f97316', size: 8 },
-                    text: combinedMaxMarker.y.map((v: number) => v.toFixed(1)),
-                    textposition: 'top center',
-                    hovertemplate: '%{text} kn<extra>Máximo</extra>',
-                    showlegend: false,
-                  } as any,
-                  {
-                    x: combinedMinMarker.x,
-                    y: combinedMinMarker.y,
-                    type: 'scatter',
-                    mode: 'markers+text',
-                    name: 'Mínimo',
-                    marker: { color: '#60a5fa', size: 8 },
-                    text: combinedMinMarker.y.map((v: number) => v.toFixed(1)),
-                    textposition: 'bottom center',
-                    hovertemplate: '%{text} kn<extra>Mínimo</extra>',
-                    showlegend: false,
-                  } as any,
-                ]}
-                layout={{
-                  autosize: true,
-                  height: 320,
-                  margin: { l: 40, r: 20, t: 10, b: 40 },
-                  paper_bgcolor: 'rgba(0,0,0,0)',
-                  plot_bgcolor: 'rgba(0,0,0,0)',
-                  xaxis: {
-                    type: 'date',
-                    title: '',
-                    range: [rangeStartIsoZ, rangeEndIsoZ],
-                  },
-                  yaxis: {
-                    title: 'kn',
-                    rangemode: 'tozero',
-                    gridcolor: '#1f2937',
-                    zerolinecolor: '#1f2937',
-                  },
-                  showlegend: true,
-                  legend: { orientation: 'h', x: 1, xanchor: 'right', y: 1.1 },
-                  shapes: [
-                    {
-                      type: 'line',
-                      xref: 'paper',
-                      x0: 0,
-                      x1: 1,
-                      y0: avgSpeedKn,
-                      y1: avgSpeedKn,
-                      line: { color: '#94a3b8', dash: 'dash', width: 1 },
-                    },
-                  ],
-                }}
-                config={{ responsive: true, displayModeBar: false }}
-                style={{ width: '100%' }}
-              />
-            ) : (
-              <div className="text-sm text-gray-500">Cargando gráfico…</div>
-            )}
-          </div>
-
-          {/* Wind direction */}
-          <div className="w-full">
-            <div className="text-sm text-gray-500 mb-2">Dirección del viento</div>
-            {PlotComponent ? (
-              <PlotComponent
-                data={[
-                  {
-                    x,
-                    y: dirDeg,
-                    type: 'scatter',
-                    mode: 'markers',
-                    name: 'Wind Direction',
-                    marker: { color: '#f59e0b', size: 6, opacity: 0.9 },
-                    text: xTextMadrid,
-                    hovertemplate: '%{text}<br>%{y:.0f}°<extra></extra>',
-                  } as any,
-                ]}
-                layout={{
-                  autosize: true,
-                  height: 260,
-                  margin: { l: 40, r: 20, t: 10, b: 40 },
-                  paper_bgcolor: 'rgba(0,0,0,0)',
-                  plot_bgcolor: 'rgba(0,0,0,0)',
-                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ] },
-                  yaxis: {
-                    title: '°',
-                    range: [0, 360],
-                    tickvals: [0, 90, 180, 270, 360],
-                    ticktext: ['N', 'E', 'S', 'W', 'N'],
-                    gridcolor: '#1f2937',
-                    zerolinecolor: '#1f2937',
-                  },
-                  showlegend: false,
                 }}
                 config={{ responsive: true, displayModeBar: false }}
                 style={{ width: '100%' }}
