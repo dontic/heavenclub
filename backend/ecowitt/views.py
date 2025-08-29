@@ -1,5 +1,5 @@
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from django.utils.dateparse import parse_datetime
@@ -177,10 +177,8 @@ class EcowittHistoryView(APIView):
         next_day_local = start_local + timedelta(days=1)
 
         # Convert local window to UTC for querying stored UTC bucket_start
-        from django.utils import timezone as dj_timezone
-
-        start_utc = start_local.astimezone(dj_timezone.utc)
-        next_day_utc = next_day_local.astimezone(dj_timezone.utc)
+        start_utc = start_local.astimezone(timezone.utc)
+        next_day_utc = next_day_local.astimezone(timezone.utc)
 
         queryset = EcowittObservation5Min.objects.filter(
             bucket_start__gte=start_utc, bucket_start__lt=next_day_utc
