@@ -162,6 +162,8 @@ const Plots = () => {
     tempMaxMarker,
     humMinMarker,
     humMaxMarker,
+    combinedMinMarker,
+    combinedMaxMarker,
   } = useMemo(() => {
     const xVals: string[] = [];
     const xText: string[] = [];
@@ -216,8 +218,25 @@ const Plots = () => {
       hMaxIdx = -1,
       hMinVal = Number.POSITIVE_INFINITY,
       hMaxVal = Number.NEGATIVE_INFINITY;
+    let sMinIdx = -1,
+      sMaxIdx = -1,
+      sMinVal = Number.POSITIVE_INFINITY,
+      sMaxVal = Number.NEGATIVE_INFINITY;
+    let gMinIdx = -1,
+      gMaxIdx = -1,
+      gMinVal = Number.POSITIVE_INFINITY,
+      gMaxVal = Number.NEGATIVE_INFINITY;
+
+    // Track combined min/max across speed and gust
+    let combinedMinIdx = -1;
+    let combinedMinVal = Number.POSITIVE_INFINITY;
+    let combinedMinSeries: 'speed' | 'gust' | null = null;
+    let combinedMaxIdx = -1;
+    let combinedMaxVal = Number.NEGATIVE_INFINITY;
+    let combinedMaxSeries: 'speed' | 'gust' | null = null;
 
     for (let i = 0; i < xVals.length; i++) {
+      // Temperature
       const tv = tC[i];
       if (Number.isFinite(tv)) {
         if (tv < tMinVal) {
@@ -229,6 +248,7 @@ const Plots = () => {
           tMaxIdx = i;
         }
       }
+      // Humidity
       const hv = hPct[i];
       if (Number.isFinite(hv)) {
         if (hv < hMinVal) {
@@ -240,6 +260,52 @@ const Plots = () => {
           hMaxIdx = i;
         }
       }
+      // Wind speed
+      const sv = sKn[i];
+      if (Number.isFinite(sv)) {
+        if (sv < sMinVal) {
+          sMinVal = sv;
+          sMinIdx = i;
+        }
+        if (sv > sMaxVal) {
+          sMaxVal = sv;
+          sMaxIdx = i;
+        }
+      }
+      // Gust
+      const gv = gKn[i];
+      if (Number.isFinite(gv)) {
+        if (gv < gMinVal) {
+          gMinVal = gv;
+          gMinIdx = i;
+        }
+        if (gv > gMaxVal) {
+          gMaxVal = gv;
+          gMaxIdx = i;
+        }
+      }
+
+      // Combined (consider both speed and gust)
+      if (Number.isFinite(sv) && sv < combinedMinVal) {
+        combinedMinVal = sv;
+        combinedMinIdx = i;
+        combinedMinSeries = 'speed';
+      }
+      if (Number.isFinite(gv) && gv < combinedMinVal) {
+        combinedMinVal = gv;
+        combinedMinIdx = i;
+        combinedMinSeries = 'gust';
+      }
+      if (Number.isFinite(sv) && sv > combinedMaxVal) {
+        combinedMaxVal = sv;
+        combinedMaxIdx = i;
+        combinedMaxSeries = 'speed';
+      }
+      if (Number.isFinite(gv) && gv > combinedMaxVal) {
+        combinedMaxVal = gv;
+        combinedMaxIdx = i;
+        combinedMaxSeries = 'gust';
+      }
     }
 
     const tempMinMarker =
@@ -250,6 +316,24 @@ const Plots = () => {
       hMinIdx >= 0 ? { x: [xVals[hMinIdx]], y: [hPct[hMinIdx]], text: [xText[hMinIdx]] } : { x: [], y: [], text: [] };
     const humMaxMarker =
       hMaxIdx >= 0 ? { x: [xVals[hMaxIdx]], y: [hPct[hMaxIdx]], text: [xText[hMaxIdx]] } : { x: [], y: [], text: [] };
+    const combinedMinMarker =
+      combinedMinIdx >= 0
+        ? {
+            x: [xVals[combinedMinIdx]],
+            y: [combinedMinVal],
+            text: [xText[combinedMinIdx]],
+            customLabel: combinedMinSeries === 'gust' ? 'Racha mín' : 'Viento mín',
+          }
+        : ({ x: [], y: [], text: [], customLabel: '' } as any);
+    const combinedMaxMarker =
+      combinedMaxIdx >= 0
+        ? {
+            x: [xVals[combinedMaxIdx]],
+            y: [combinedMaxVal],
+            text: [xText[combinedMaxIdx]],
+            customLabel: combinedMaxSeries === 'gust' ? 'Racha máx' : 'Viento máx',
+          }
+        : ({ x: [], y: [], text: [], customLabel: '' } as any);
 
     return {
       x: xVals,
@@ -266,6 +350,8 @@ const Plots = () => {
       tempMaxMarker,
       humMinMarker,
       humMaxMarker,
+      combinedMinMarker,
+      combinedMaxMarker,
     };
   }, [data]);
 
@@ -464,6 +550,30 @@ const Plots = () => {
                     line: { color: '#eab308', width: 2 },
                     text: xTextMadrid,
                     hovertemplate: '%{text}<br>%{y:.1f} kn speed<extra></extra>',
+                  } as any,
+                  {
+                    x: combinedMaxMarker.x,
+                    y: combinedMaxMarker.y,
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    name: 'Máximo',
+                    marker: { color: '#f97316', size: 8 },
+                    text: combinedMaxMarker.y.map((v: number) => v.toFixed(1)),
+                    textposition: 'top center',
+                    hovertemplate: '%{text} kn<extra>Máximo</extra>',
+                    showlegend: false,
+                  } as any,
+                  {
+                    x: combinedMinMarker.x,
+                    y: combinedMinMarker.y,
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    name: 'Mínimo',
+                    marker: { color: '#60a5fa', size: 8 },
+                    text: combinedMinMarker.y.map((v: number) => v.toFixed(1)),
+                    textposition: 'bottom center',
+                    hovertemplate: '%{text} kn<extra>Mínimo</extra>',
+                    showlegend: false,
                   } as any,
                 ]}
                 layout={{
