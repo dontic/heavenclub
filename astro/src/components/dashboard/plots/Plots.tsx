@@ -6,6 +6,8 @@ type FiveMin = {
   windspeedmph_avg?: number;
   windgustmph_max?: number;
   winddir_avg?: number;
+  tempf_avg?: number;
+  humidity_avg?: number;
 };
 
 const mphToKnots = (mph: number): number => mph * 0.868976;
@@ -145,12 +147,29 @@ const Plots = () => {
     };
   }, [date]);
 
-  const { x, xTextMadrid, speedKn, gustKn, dirDeg, avgSpeedKn } = useMemo(() => {
+  const {
+    x,
+    xTextMadrid,
+    speedKn,
+    gustKn,
+    dirDeg,
+    avgSpeedKn,
+    tempC,
+    humidityPct,
+    avgTempC,
+    avgHumidityPct,
+    tempMinMarker,
+    tempMaxMarker,
+    humMinMarker,
+    humMaxMarker,
+  } = useMemo(() => {
     const xVals: string[] = [];
     const xText: string[] = [];
     const sKn: number[] = [];
     const gKn: number[] = [];
     const dDeg: number[] = [];
+    const tC: number[] = [];
+    const hPct: number[] = [];
 
     if (data && Array.isArray(data)) {
       for (const r of data) {
@@ -174,13 +193,80 @@ const Plots = () => {
         sKn.push(mphToKnots(Number(r.windspeedmph_avg ?? 0)));
         gKn.push(mphToKnots(Number(r.windgustmph_max ?? 0)));
         dDeg.push(Number(r.winddir_avg ?? NaN));
+        const tempFAvg = Number(r.tempf_avg ?? NaN);
+        const tempCVal = (tempFAvg - 32) * (5 / 9);
+        tC.push(tempCVal);
+        hPct.push(Number(r.humidity_avg ?? NaN));
       }
     }
 
     const validSpeeds = sKn.filter((v) => Number.isFinite(v));
     const avg = validSpeeds.length ? validSpeeds.reduce((a, b) => a + b, 0) / validSpeeds.length : 0;
 
-    return { x: xVals, xTextMadrid: xText, speedKn: sKn, gustKn: gKn, dirDeg: dDeg, avgSpeedKn: avg };
+    const validTemps = tC.filter((v) => Number.isFinite(v));
+    const avgT = validTemps.length ? validTemps.reduce((a, b) => a + b, 0) / validTemps.length : 0;
+    const validHums = hPct.filter((v) => Number.isFinite(v));
+    const avgH = validHums.length ? validHums.reduce((a, b) => a + b, 0) / validHums.length : 0;
+
+    let tMinIdx = -1,
+      tMaxIdx = -1,
+      tMinVal = Number.POSITIVE_INFINITY,
+      tMaxVal = Number.NEGATIVE_INFINITY;
+    let hMinIdx = -1,
+      hMaxIdx = -1,
+      hMinVal = Number.POSITIVE_INFINITY,
+      hMaxVal = Number.NEGATIVE_INFINITY;
+
+    for (let i = 0; i < xVals.length; i++) {
+      const tv = tC[i];
+      if (Number.isFinite(tv)) {
+        if (tv < tMinVal) {
+          tMinVal = tv;
+          tMinIdx = i;
+        }
+        if (tv > tMaxVal) {
+          tMaxVal = tv;
+          tMaxIdx = i;
+        }
+      }
+      const hv = hPct[i];
+      if (Number.isFinite(hv)) {
+        if (hv < hMinVal) {
+          hMinVal = hv;
+          hMinIdx = i;
+        }
+        if (hv > hMaxVal) {
+          hMaxVal = hv;
+          hMaxIdx = i;
+        }
+      }
+    }
+
+    const tempMinMarker =
+      tMinIdx >= 0 ? { x: [xVals[tMinIdx]], y: [tC[tMinIdx]], text: [xText[tMinIdx]] } : { x: [], y: [], text: [] };
+    const tempMaxMarker =
+      tMaxIdx >= 0 ? { x: [xVals[tMaxIdx]], y: [tC[tMaxIdx]], text: [xText[tMaxIdx]] } : { x: [], y: [], text: [] };
+    const humMinMarker =
+      hMinIdx >= 0 ? { x: [xVals[hMinIdx]], y: [hPct[hMinIdx]], text: [xText[hMinIdx]] } : { x: [], y: [], text: [] };
+    const humMaxMarker =
+      hMaxIdx >= 0 ? { x: [xVals[hMaxIdx]], y: [hPct[hMaxIdx]], text: [xText[hMaxIdx]] } : { x: [], y: [], text: [] };
+
+    return {
+      x: xVals,
+      xTextMadrid: xText,
+      speedKn: sKn,
+      gustKn: gKn,
+      dirDeg: dDeg,
+      avgSpeedKn: avg,
+      tempC: tC,
+      humidityPct: hPct,
+      avgTempC: avgT,
+      avgHumidityPct: avgH,
+      tempMinMarker,
+      tempMaxMarker,
+      humMinMarker,
+      humMaxMarker,
+    };
   }, [data]);
 
   const hasData = x.length > 0;
@@ -203,6 +289,155 @@ const Plots = () => {
         <div className="text-sm text-gray-500">No hay datos para esta fecha</div>
       ) : (
         <>
+          {/* Temperature */}
+          <div className="w-full">
+            <div className="text-sm text-gray-500 mb-2">Temperatura</div>
+            {PlotComponent ? (
+              <PlotComponent
+                data={[
+                  {
+                    x,
+                    y: tempC,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Temperatura',
+                    line: { color: '#eab308', width: 2 },
+                    text: xTextMadrid,
+                    hovertemplate: '%{text}<br>%{y:.1f} °C<extra></extra>',
+                  } as any,
+                  {
+                    x: tempMaxMarker.x,
+                    y: tempMaxMarker.y,
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    name: 'Máxima',
+                    marker: { color: '#f97316', size: 8 },
+                    text: tempMaxMarker.y.map((v: number) => v.toFixed(1)),
+                    textposition: 'top center',
+                    hovertemplate: '%{text} °C<extra>Max</extra>',
+                    showlegend: false,
+                  } as any,
+                  {
+                    x: tempMinMarker.x,
+                    y: tempMinMarker.y,
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    name: 'Mínima',
+                    marker: { color: '#60a5fa', size: 8 },
+                    text: tempMinMarker.y.map((v: number) => v.toFixed(1)),
+                    textposition: 'bottom center',
+                    hovertemplate: '%{text} °C<extra>Min</extra>',
+                    showlegend: false,
+                  } as any,
+                ]}
+                layout={{
+                  autosize: true,
+                  height: 300,
+                  margin: { l: 40, r: 20, t: 10, b: 40 },
+                  paper_bgcolor: 'rgba(0,0,0,0)',
+                  plot_bgcolor: 'rgba(0,0,0,0)',
+                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ] },
+                  yaxis: {
+                    title: '°C',
+                    gridcolor: '#1f2937',
+                    zerolinecolor: '#1f2937',
+                  },
+                  showlegend: false,
+                  shapes: [
+                    {
+                      type: 'line',
+                      xref: 'paper',
+                      x0: 0,
+                      x1: 1,
+                      y0: avgTempC,
+                      y1: avgTempC,
+                      line: { color: '#94a3b8', dash: 'dash', width: 1 },
+                    },
+                  ],
+                }}
+                config={{ responsive: true, displayModeBar: false }}
+                style={{ width: '100%' }}
+              />
+            ) : (
+              <div className="text-sm text-gray-500">Cargando gráfico…</div>
+            )}
+          </div>
+
+          {/* Humidity */}
+          <div className="w-full">
+            <div className="text-sm text-gray-500 mb-2">Humedad</div>
+            {PlotComponent ? (
+              <PlotComponent
+                data={[
+                  {
+                    x,
+                    y: humidityPct,
+                    type: 'scatter',
+                    mode: 'lines',
+                    name: 'Humedad',
+                    line: { color: '#fbbf24', width: 2 },
+                    text: xTextMadrid,
+                    hovertemplate: '%{text}<br>%{y:.0f}%<extra></extra>',
+                  } as any,
+                  {
+                    x: humMaxMarker.x,
+                    y: humMaxMarker.y,
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    name: 'Máxima',
+                    marker: { color: '#f97316', size: 8 },
+                    text: humMaxMarker.y.map((v: number) => v.toFixed(0)),
+                    textposition: 'top center',
+                    hovertemplate: '%{text}%<extra>Max</extra>',
+                    showlegend: false,
+                  } as any,
+                  {
+                    x: humMinMarker.x,
+                    y: humMinMarker.y,
+                    type: 'scatter',
+                    mode: 'markers+text',
+                    name: 'Mínima',
+                    marker: { color: '#60a5fa', size: 8 },
+                    text: humMinMarker.y.map((v: number) => v.toFixed(0)),
+                    textposition: 'bottom center',
+                    hovertemplate: '%{text}%<extra>Min</extra>',
+                    showlegend: false,
+                  } as any,
+                ]}
+                layout={{
+                  autosize: true,
+                  height: 260,
+                  margin: { l: 40, r: 20, t: 10, b: 40 },
+                  paper_bgcolor: 'rgba(0,0,0,0)',
+                  plot_bgcolor: 'rgba(0,0,0,0)',
+                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ] },
+                  yaxis: {
+                    title: '%',
+                    rangemode: 'tozero',
+                    gridcolor: '#1f2937',
+                    zerolinecolor: '#1f2937',
+                  },
+                  showlegend: false,
+                  shapes: [
+                    {
+                      type: 'line',
+                      xref: 'paper',
+                      x0: 0,
+                      x1: 1,
+                      y0: avgHumidityPct,
+                      y1: avgHumidityPct,
+                      line: { color: '#94a3b8', dash: 'dash', width: 1 },
+                    },
+                  ],
+                }}
+                config={{ responsive: true, displayModeBar: false }}
+                style={{ width: '100%' }}
+              />
+            ) : (
+              <div className="text-sm text-gray-500">Cargando gráfico…</div>
+            )}
+          </div>
+
           {/* Wind speed + gusts */}
           <div className="w-full">
             <div className="text-sm text-gray-500 mb-2">Velocidad del viento</div>
