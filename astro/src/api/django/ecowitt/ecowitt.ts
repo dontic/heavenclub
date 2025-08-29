@@ -1,5 +1,10 @@
 // @ts-nocheck
-import type { EcowittHistoryListParams, EcowittObservation, EcowittObservationRequest } from '../api.schemas';
+import type {
+  EcowittHistoryListParams,
+  EcowittObservation,
+  EcowittObservation5Min,
+  EcowittObservationRequest,
+} from '../api.schemas';
 
 import { customAxiosInstance } from '../../axios';
 
@@ -23,13 +28,13 @@ export const ecowittCreate = (
   );
 };
 /**
- * Get observations between two datetimes via GET
+ * Get aggregated 5-minute observations for a given date in Madrid timezone
  */
 export const ecowittHistoryList = (
   params: EcowittHistoryListParams,
   options?: SecondParameter<typeof customAxiosInstance>
 ) => {
-  return customAxiosInstance<EcowittObservation[]>({ url: `/ecowitt/history`, method: 'GET', params }, options);
+  return customAxiosInstance<EcowittObservation5Min[]>({ url: `/ecowitt/history`, method: 'GET', params }, options);
 };
 /**
  * Get the latest Ecowitt observation via GET
