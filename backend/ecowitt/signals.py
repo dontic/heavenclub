@@ -42,6 +42,20 @@ def create_ecowitt_purge_schedule(sender, app_config=None, **kwargs):
             task=task_name,
             defaults={"enabled": True},
         )
+
+        # Ensure 2-minute aggregation schedule exists
+        from django_celery_beat.models import IntervalSchedule
+
+        interval, _ = IntervalSchedule.objects.get_or_create(
+            every=2, period=IntervalSchedule.MINUTES
+        )
+        agg_task_name = "ecowitt.tasks.aggregate_observations_5min"
+        PeriodicTask.objects.get_or_create(
+            interval=interval,
+            name="Aggregate Ecowitt observations into 5-minute buckets (every 2m)",
+            task=agg_task_name,
+            defaults={"enabled": True},
+        )
     except Exception as exc:  # pragma: no cover - defensive
         # Do not crash migrations for scheduling errors
         log.warning("Failed to ensure purge task schedule post-migrate: %s", exc)
