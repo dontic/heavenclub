@@ -1,5 +1,6 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from django.utils.dateparse import parse_datetime
 from django.http import QueryDict
@@ -9,9 +10,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
-from .serializers import EcowittObservationSerializer
+from .serializers import (
+    EcowittObservationSerializer,
+    EcowittObservation5MinSerializer,
+)
 from .permissions import IsAuthenticatedOrHasServiceToken
-from .models import EcowittObservation
+from .models import EcowittObservation, EcowittObservation5Min
 
 import logging
 
@@ -117,10 +121,9 @@ class EcowittRealtimeView(APIView):
 
 class EcowittHistoryView(APIView):
     """
-    Returns observations between two datetimes. Authentication required.
+    Returns aggregated 5-minute observations for a given date in Madrid timezone.
     Query params:
-      - start: ISO8601 datetime
-      - end: ISO8601 datetime
+      - date: YYYY-MM-DD (interpreted in Europe/Madrid; 00:00 to next day 00:00)
     """
 
     permission_classes = [IsAuthenticated]
@@ -128,51 +131,60 @@ class EcowittHistoryView(APIView):
     @extend_schema(
         parameters=[
             OpenApiParameter(
-                name="start",
-                type=OpenApiTypes.DATETIME,
+                name="date",
+                type=OpenApiTypes.DATE,
                 location=OpenApiParameter.QUERY,
                 required=True,
-                description="Start datetime (inclusive)",
-            ),
-            OpenApiParameter(
-                name="end",
-                type=OpenApiTypes.DATETIME,
-                location=OpenApiParameter.QUERY,
-                required=True,
-                description="End datetime (inclusive)",
+                description=(
+                    "Date in format YYYY-MM-DD. Interpreted in Europe/Madrid; "
+                    "returns 5-minute aggregates from 00:00 to 23:59 for that local day."
+                ),
             ),
         ],
-        responses={200: EcowittObservationSerializer(many=True)},
-        description="Get observations between two datetimes via GET",
+        responses={200: EcowittObservation5MinSerializer(many=True)},
+        description=(
+            "Get aggregated 5-minute observations for a given date in Madrid timezone"
+        ),
     )
     def get(self, request, *args, **kwargs):
-        start_raw = request.query_params.get("start")
-        end_raw = request.query_params.get("end")
+        date_raw = request.query_params.get("date")
 
-        if not start_raw or not end_raw:
+        if not date_raw:
             return Response(
-                {"detail": "Both 'start' and 'end' query parameters are required"},
+                {"detail": "'date' query parameter is required (YYYY-MM-DD)"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        start_dt = parse_datetime(start_raw)
-        end_dt = parse_datetime(end_raw)
-
-        if start_dt is None or end_dt is None:
+        try:
+            # Parse YYYY-MM-DD
+            target_date = datetime.strptime(date_raw, "%Y-%m-%d").date()
+        except ValueError:
             return Response(
-                {"detail": "Invalid datetime format for 'start' or 'end'"},
+                {"detail": "Invalid date format. Use YYYY-MM-DD"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if end_dt < start_dt:
-            return Response(
-                {"detail": "'end' must be greater than or equal to 'start'"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        madrid_tz = ZoneInfo("Europe/Madrid")
+        start_local = datetime(
+            target_date.year,
+            target_date.month,
+            target_date.day,
+            0,
+            0,
+            0,
+            tzinfo=madrid_tz,
+        )
+        next_day_local = start_local + timedelta(days=1)
 
-        queryset = EcowittObservation.objects.filter(
-            dateutc__gte=start_dt, dateutc__lte=end_dt
-        ).order_by("dateutc", "created_at")
+        # Convert local window to UTC for querying stored UTC bucket_start
+        from django.utils import timezone as dj_timezone
 
-        serializer = EcowittObservationSerializer(queryset, many=True)
+        start_utc = start_local.astimezone(dj_timezone.utc)
+        next_day_utc = next_day_local.astimezone(dj_timezone.utc)
+
+        queryset = EcowittObservation5Min.objects.filter(
+            bucket_start__gte=start_utc, bucket_start__lt=next_day_utc
+        ).order_by("bucket_start", "created_at")
+
+        serializer = EcowittObservation5MinSerializer(queryset, many=True)
         return Response(serializer.data)

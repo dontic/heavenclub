@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import EcowittObservation
+from .models import EcowittObservation, EcowittObservation5Min
 
 
 class EcowittObservationSerializer(serializers.ModelSerializer):
@@ -44,4 +44,33 @@ class EcowittObservationSerializer(serializers.ModelSerializer):
             "freq",
             "model",
             "interval",
+        ]
+
+
+class EcowittObservation5MinSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EcowittObservation5Min
+        fields = [
+            "bucket_start",
+            "sample_count",
+            "tempinf_avg",
+            "humidityin_avg",
+            "baromrelin_avg",
+            "baromabsin_avg",
+            "tempf_avg",
+            "humidity_avg",
+            "winddir_avg",
+            "windspeedmph_avg",
+            "windgustmph_max",
+            "maxdailygust_max",
+            "solarradiation_avg",
+            "uv_avg",
+            "rainratein_avg",
+            "eventrainin_last",
+            "hourlyrainin_last",
+            "dailyrainin_last",
+            "weeklyrainin_last",
+            "monthlyrainin_last",
+            "yearlyrainin_last",
+            "totalrainin_last",
         ]
