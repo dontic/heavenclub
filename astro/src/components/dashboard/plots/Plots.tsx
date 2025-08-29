@@ -191,7 +191,6 @@ const Plots = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
-        <div className="text-sm text-gray-600">Gráficos de viento</div>
         <input
           type="date"
           value={date}
@@ -208,6 +207,7 @@ const Plots = () => {
         <>
           {/* Wind speed + gusts */}
           <div className="w-full">
+            <div className="text-sm text-gray-500 mb-2">Velocidad del viento</div>
             {PlotComponent ? (
               <PlotComponent
                 data={[
@@ -274,6 +274,7 @@ const Plots = () => {
 
           {/* Wind direction */}
           <div className="w-full">
+            <div className="text-sm text-gray-500 mb-2">Dirección del viento</div>
             {PlotComponent ? (
               <PlotComponent
                 data={[
