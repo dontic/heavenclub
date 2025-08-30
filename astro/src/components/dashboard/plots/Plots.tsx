@@ -437,12 +437,14 @@ const Plots = () => {
                     type: 'date',
                     title: '',
                     range: [rangeStartIsoZ, rangeEndIsoZ],
+                    fixedrange: true,
                   },
                   yaxis: {
                     title: 'kn',
                     rangemode: 'tozero',
                     gridcolor: '#1f2937',
                     zerolinecolor: '#1f2937',
+                    fixedrange: true,
                   },
                   showlegend: true,
                   legend: { orientation: 'h', x: 1, xanchor: 'right', y: 1.1 },
@@ -489,7 +491,7 @@ const Plots = () => {
                   margin: { l: 40, r: 20, t: 10, b: 40 },
                   paper_bgcolor: 'rgba(0,0,0,0)',
                   plot_bgcolor: 'rgba(0,0,0,0)',
-                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ] },
+                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ], fixedrange: true },
                   yaxis: {
                     title: '°',
                     range: [0, 360],
@@ -497,6 +499,7 @@ const Plots = () => {
                     ticktext: ['N', 'E', 'S', 'W', 'N'],
                     gridcolor: '#1f2937',
                     zerolinecolor: '#1f2937',
+                    fixedrange: true,
                   },
                   showlegend: false,
                 }}
@@ -554,11 +557,12 @@ const Plots = () => {
                   margin: { l: 40, r: 20, t: 10, b: 40 },
                   paper_bgcolor: 'rgba(0,0,0,0)',
                   plot_bgcolor: 'rgba(0,0,0,0)',
-                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ] },
+                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ], fixedrange: true },
                   yaxis: {
                     title: '°C',
                     gridcolor: '#1f2937',
                     zerolinecolor: '#1f2937',
+                    fixedrange: true,
                   },
                   showlegend: false,
                   shapes: [
@@ -628,12 +632,13 @@ const Plots = () => {
                   margin: { l: 40, r: 20, t: 10, b: 40 },
                   paper_bgcolor: 'rgba(0,0,0,0)',
                   plot_bgcolor: 'rgba(0,0,0,0)',
-                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ] },
+                  xaxis: { type: 'date', title: '', range: [rangeStartIsoZ, rangeEndIsoZ], fixedrange: true },
                   yaxis: {
                     title: '%',
                     rangemode: 'tozero',
                     gridcolor: '#1f2937',
                     zerolinecolor: '#1f2937',
+                    fixedrange: true,
                   },
                   showlegend: false,
                   shapes: [
