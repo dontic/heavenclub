@@ -98,6 +98,21 @@ const getMadridDayBoundsIsoZ = (ymd: string): [string, string] => {
   return [start, end];
 };
 
+// Parse YYYY-MM-DD into components
+const parseYmd = (ymd: string): { y: number; m: number; d: number } => {
+  const [y, m, d] = ymd.split('-').map((v) => Number(v));
+  return { y, m, d };
+};
+
+// Shift a YYYY-MM-DD date string by a number of days, returning a new YYYY-MM-DD in Madrid timezone
+const shiftYmd = (ymd: string, deltaDays: number): string => {
+  if (!ymd) return ymd;
+  const { y, m, d } = parseYmd(ymd);
+  const baseUtc = new Date(Date.UTC(y, m - 1, d));
+  baseUtc.setUTCDate(baseUtc.getUTCDate() + deltaDays);
+  return getMadridDateString(baseUtc);
+};
+
 const Plots = () => {
   const [date, setDate] = useState<string>(() => getMadridDateString(new Date()));
   const [data, setData] = useState<FiveMin[] | null>(null);
@@ -361,12 +376,40 @@ const Plots = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="text-sm border border-gray-300 rounded px-2 py-1"
-        />
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            className="text-sm border border-gray-300 rounded px-2 py-1 hover:bg-gray-50"
+            onClick={() => setDate(shiftYmd(date, -1))}
+            aria-label="Día anterior"
+            title="Día anterior"
+          >
+            ◀
+          </button>
+          <div className="text-sm tabular-nums">{date}</div>
+          {(() => {
+            const todayStr = getMadridDateString(new Date());
+            const tomorrowStr = shiftYmd(todayStr, 1);
+            const nextDateStr = shiftYmd(date, 1);
+            const isNextDisabled = nextDateStr === tomorrowStr;
+            return (
+              <button
+                type="button"
+                className={`text-sm border border-gray-300 rounded px-2 py-1 ${
+                  isNextDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-50'
+                }`}
+                onClick={() => {
+                  if (!isNextDisabled) setDate(shiftYmd(date, 1));
+                }}
+                disabled={isNextDisabled}
+                aria-label="Día siguiente"
+                title={isNextDisabled ? 'No disponible (mañana)' : 'Día siguiente'}
+              >
+                ▶
+              </button>
+            );
+          })()}
+        </div>
         {loading && <div className="text-sm text-gray-500">Cargando…</div>}
         {error && <div className="text-sm text-red-600">{error}</div>}
       </div>
