@@ -29,10 +29,10 @@ export default defineConfig({
         name: 'Heaven Club',
         short_name: 'HeavenClub',
         description: 'Webcam stream, wind data and club info',
-        theme_color: '#0ea5e9',
-        background_color: '#0b1220',
+        theme_color: '#FFFFFF',
+        background_color: '#FFFFFF',
         display: 'standalone',
-        start_url: '/',
+        start_url: '/dashboard/',
         scope: '/',
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
