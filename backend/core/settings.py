@@ -122,8 +122,8 @@ CSRF_COOKIE_NAME = os.getenv("DJANGO_CSRF_COOKIE_NAME", "csrftoken")
 
 CSRF_COOKIE_DOMAIN = os.getenv("DJANGO_CSRF_COOKIE_DOMAIN")
 
-CSRF_COOKIE_SAMESITE = None
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SAMESITE = "None"
+CSRF_COOKIE_SECURE = False if DEBUG else True
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 
@@ -151,9 +151,21 @@ if "DJANGO_SESSION_COOKIE_DOMAIN" not in os.environ:
     raise ValueError("DJANGO_SESSION_COOKIE_DOMAIN environment variable is not set.")
 SESSION_COOKIE_DOMAIN = os.getenv("DJANGO_SESSION_COOKIE_DOMAIN")
 
-SESSION_COOKIE_SAMESITE = None
-SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = False if DEBUG else True
 SESSION_COOKIE_HTTPONLY = False
+
+# Ensure sessions last a reasonable time and refresh on each request
+# 400 days default (browser cap for persistent cookies)
+SESSION_COOKIE_AGE = int(
+    os.getenv("DJANGO_SESSION_COOKIE_AGE", str(400 * 24 * 60 * 60))
+)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = (
+    os.getenv("DJANGO_SESSION_EXPIRE_AT_BROWSER_CLOSE", "False") == "True"
+)
+SESSION_SAVE_EVERY_REQUEST = (
+    os.getenv("DJANGO_SESSION_SAVE_EVERY_REQUEST", "True") == "True"
+)
 
 
 # ---------------------------------------------------------------------------- #
