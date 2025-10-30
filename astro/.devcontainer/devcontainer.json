@@ -1,15 +1,15 @@
 // devcontainer.json
 {
-    "name": "HeavenClub", // Name of the dev container
+    "name": "HeavenClub Landing", // Name of the dev container
     "shutdownAction": "stopContainer", // Container behavior on VSCode close: none, stopContainer (default for image or Dockerfile), and stopCompose (default for Docker Compose)
     "build": {
         "dockerfile": "Dockerfile",
         "context": ".."
     },
     // Port forwarding
-    "appPort": [
-        "4321:4321"
-    ],
+    // "appPort": [
+    //     "4321:4321"
+    // ],
     // Extensions and settings
     "customizations": {
         "vscode": {
