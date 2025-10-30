@@ -6,6 +6,8 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import LogoutButton from '../authentication/LogoutButton';
 import { getAllauthClientV1AuthSession } from '~/api/allauth/authentication-current-session/authentication-current-session';
 import hlsOverlayUrl from '~/assets/images/hls-overlay.png?url';
+import heavenBeachClubLogo from '~/assets/images/heavenbeachclub_logo.png';
+import danielEsAvatar from '~/assets/images/daniel_es_avatar.jpeg';
 
 const Dashboard = () => {
   /* --------------------------------- STATES --------------------------------- */
@@ -31,7 +33,8 @@ const Dashboard = () => {
       } catch (error) {
         console.error('Authentication error:', error);
         // Redirect to signin page if there's an authentication error
-        window.location.href = '/signin/';
+        // window.location.href = '/signin/';
+        setIsLoading(false);
       }
     };
 
@@ -108,6 +111,115 @@ const Dashboard = () => {
         <div className="w-full max-w-6xl mb-8">
           <h2 className="text-xl font-semibold mb-4">La previ del Heaven</h2>
           <WindGuru className="w-full" />
+        </div>
+
+        {/* Sponsored Card - Heaven Beach Bar */}
+        <div className="w-full max-w-3xl mb-8">
+          <div className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-400 p-[2px] shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300">
+            <div className="relative bg-slate-900 rounded-2xl p-8 backdrop-blur-sm">
+              {/* Animated background glow */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-teal-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+              {/* Content */}
+              <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex-1 text-center md:text-left">
+                  <div className="inline-block px-3 py-1 bg-gradient-to-r from-cyan-500/20 to-teal-400/20 rounded-full text-cyan-300 text-sm font-medium mb-3 border border-cyan-500/30">
+                    Patrocinado por
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Heaven Beach Bar</h3>
+                  <p className="text-slate-300 text-sm md:text-base leading-relaxed">
+                    Este portal es posible gracias al apoyo de Heaven Beach Bar, que nos permite hacer uso de sus
+                    instalaciones para instalar nuestra cámara y estación meteorológica.
+                  </p>
+                </div>
+
+                <div className="flex-shrink-0">
+                  <div className="relative group/logo">
+                    <a
+                      href="https://heavenbeachbar.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-umami-event="heavenbeachbar-link"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-cyan-400 to-teal-400 rounded-xl blur-xl opacity-50 group-hover/logo:opacity-75 transition-opacity duration-300 pointer-events-none"></div>
+                      <div className="relative bg-white rounded-xl p-4 shadow-lg transform group-hover:scale-105 transition-transform duration-300">
+                        <img
+                          src={heavenBeachClubLogo.src}
+                          alt="Heaven Beach Club Logo"
+                          className="w-24 h-24 md:w-32 md:h-32 object-contain"
+                        />
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-cyan-500/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-teal-500/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Developer Credit Card */}
+        <div className="w-full max-w-3xl mb-8">
+          <div className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500 via-violet-500 to-indigo-500 p-[2px] shadow-2xl hover:shadow-purple-500/50 transition-all duration-300">
+            <div className="relative bg-slate-900 rounded-2xl p-8 backdrop-blur-sm">
+              {/* Animated background glow */}
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-violet-500/10 to-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+
+              {/* Content */}
+              <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex-1 text-center md:text-left">
+                  <div className="inline-block px-3 py-1 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-full text-purple-300 text-sm font-medium mb-3 border border-purple-500/30">
+                    Desarrollado por
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 tracking-tight">Daniel.es</h3>
+                  <p className="text-slate-300 text-sm md:text-base leading-relaxed mb-3">
+                    Web y aplicación desarrolladas por Daniel. Ofrezco servicios profesionales de desarrollo de páginas
+                    web y aplicaciones web.
+                  </p>
+                  <a
+                    href="https://daniel.es/website-design/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-purple-300 hover:text-purple-200 font-medium transition-colors duration-200 cursor-pointer"
+                    data-umami-event="daniel.es-link"
+                  >
+                    <span>Visita daniel.es</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                      <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                    </svg>
+                  </a>
+                </div>
+
+                <div className="flex-shrink-0">
+                  <div className="relative group/icon">
+                    <a
+                      href="https://daniel.es/website-design/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-umami-event="daniel.es-link"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-400 to-indigo-400 rounded-xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300 pointer-events-none"></div>
+                      <div className="relative bg-white rounded-xl shadow-lg transform group-hover:scale-105 transition-transform duration-300">
+                        <img
+                          src={danielEsAvatar.src}
+                          alt="Daniel.es Avatar"
+                          className="h-30 w-30 md:h-40 md:w-40 object-cover rounded-xl"
+                        />
+                      </div>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative elements */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-purple-500/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-gradient-to-tr from-indigo-500/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+            </div>
+          </div>
         </div>
 
         <LogoutButton />
