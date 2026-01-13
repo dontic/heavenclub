@@ -122,8 +122,8 @@ CSRF_COOKIE_NAME = os.getenv("DJANGO_CSRF_COOKIE_NAME", "csrftoken")
 
 CSRF_COOKIE_DOMAIN = os.getenv("DJANGO_CSRF_COOKIE_DOMAIN")
 
-CSRF_COOKIE_SAMESITE = "None"
-CSRF_COOKIE_SECURE = False if DEBUG else True
+CSRF_COOKIE_SAMESITE = "Lax" if DEBUG else "None"
+CSRF_COOKIE_SECURE = not DEBUG
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_HTTPONLY = False
 
@@ -151,8 +151,8 @@ if "DJANGO_SESSION_COOKIE_DOMAIN" not in os.environ:
     raise ValueError("DJANGO_SESSION_COOKIE_DOMAIN environment variable is not set.")
 SESSION_COOKIE_DOMAIN = os.getenv("DJANGO_SESSION_COOKIE_DOMAIN")
 
-SESSION_COOKIE_SAMESITE = "None"
-SESSION_COOKIE_SECURE = False if DEBUG else True
+SESSION_COOKIE_SAMESITE = "Lax" if DEBUG else "None"
+SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = False
 
 # Ensure sessions last a reasonable time and refresh on each request
