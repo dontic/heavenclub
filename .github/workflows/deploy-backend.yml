@@ -50,13 +50,3 @@ jobs:
             ${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:latest
           cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:buildcache
           cache-to: type=registry,ref=${{ env.DOCKER_REGISTRY }}/${{ env.BE_DOCKER_IMAGE_NAME }}:buildcache,mode=max
-
-  deploy-backend:
-    name: Deploy Backend
-    needs: build-and-push-backend
-    runs-on: self-hosted
-
-    steps:
-      - name: Trigger Watchtower
-        run: |
-          curl -H "Authorization: Bearer ${{ secrets.WATCHTOWER_API_TOKEN }}" ${{ secrets.WATCHTOWER_URL }}/v1/update -v 
